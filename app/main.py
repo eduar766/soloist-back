@@ -27,7 +27,7 @@ from app.infrastructure.web.middleware.auth_middleware import AuthenticationMidd
 from app.infrastructure.web.routers import (
     auth,
     clients,
-    # projects,
+    projects,
     # tasks,
     # time_entries,
     # invoices,
@@ -137,11 +137,11 @@ def create_application() -> FastAPI:
         prefix=f"{settings.api_prefix}/clients",
         tags=["Clients"]
     )
-    # app.include_router(
-    #     projects.router,
-    #     prefix=f"{settings.api_prefix}/projects",
-    #     tags=["Projects"]
-    # )
+    app.include_router(
+        projects.router,
+        prefix=f"{settings.api_prefix}/projects",
+        tags=["Projects"]
+    )
     # app.include_router(
     #     tasks.router,
     #     prefix=f"{settings.api_prefix}/tasks",

@@ -693,3 +693,10 @@ class GetProjectAnalyticsUseCase(AuthorizedUseCase, GetByIdUseCase[int, ProjectA
             start_date=project.start_date,
             end_date=project.end_date
         )
+
+
+# Aliases for router compatibility
+GetProjectUseCase = GetProjectByIdUseCase
+ListProjectsUseCase = ListProjectsUseCase  # Already exists with correct name
+InviteProjectMemberUseCase = AddProjectMemberUseCase
+RemoveProjectMemberUseCase = UpdateProjectMemberUseCase  # Placeholder

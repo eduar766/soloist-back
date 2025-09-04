@@ -16,14 +16,14 @@ from app.application.use_cases.project_use_cases import (
     InviteProjectMemberUseCase,
     RemoveProjectMemberUseCase
 )
-from app.application.dto.project import (
-    CreateProjectRequest,
-    UpdateProjectRequest,
-    ProjectResponse,
-    ProjectListResponse,
-    ProjectMemberRequest
+from app.application.dto.project_dto import (
+    CreateProjectRequestDTO as CreateProjectRequest,
+    UpdateProjectRequestDTO as UpdateProjectRequest,
+    ProjectResponseDTO as ProjectResponse,
+    ProjectSummaryResponseDTO as ProjectListResponse,
+    AddProjectMemberRequestDTO as ProjectMemberRequest
 )
-from app.infrastructure.db.database import get_db_session
+from app.infrastructure.db.database import get_db
 from app.infrastructure.repositories.project_repository import SQLAlchemyProjectRepository
 from app.domain.models.base import EntityNotFoundError, ValidationError, BusinessRuleViolation
 
@@ -31,7 +31,7 @@ from app.domain.models.base import EntityNotFoundError, ValidationError, Busines
 router = APIRouter()
 
 
-def get_project_repository(session=Depends(get_db_session)):
+def get_project_repository(session=Depends(get_db)):
     """Dependency to get project repository."""
     return SQLAlchemyProjectRepository(session)
 
