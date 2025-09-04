@@ -20,6 +20,7 @@ class SQLAlchemyTimeEntryRepository(TimeEntryRepositoryInterface):
     def __init__(self, session: Session):
         self.session = session
         self.mapper = TimeEntryMapper()
+        self.model = TimeEntryModel
     
     def save(self, time_entry: TimeEntry) -> TimeEntry:
         """Save a time entry entity."""
@@ -207,3 +208,7 @@ class SQLAlchemyTimeEntryRepository(TimeEntryRepositoryInterface):
         
         result = query.scalar()
         return (result or 0) / 60.0  # Convert minutes to hours
+    
+    def get_base_query(self):
+        """Get base query for time entry model."""
+        return self.session.query(TimeEntryModel)

@@ -4,9 +4,13 @@ Handles CRUD operations for client resources.
 """
 
 from typing import Annotated, List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
 
 from app.infrastructure.auth import get_current_user_id
+from app.infrastructure.pagination import (
+    PaginationParams, SearchParams, smart_paginator, PaginationHelper
+)
+from app.infrastructure.rate_limiting import create_rate_limit, search_rate_limit
 from app.application.use_cases.client_use_cases import (
     CreateClientUseCase,
     UpdateClientUseCase,
@@ -37,7 +41,8 @@ def get_client_repository(session=Depends(get_db)):
 async def create_client(
     request: CreateClientRequestDTO,
     user_id: Annotated[str, Depends(get_current_user_id)],
-    repository: Annotated[SQLAlchemyClientRepository, Depends(get_client_repository)]
+    repository: Annotated[SQLAlchemyClientRepository, Depends(get_client_repository)],
+    _: None = Depends(create_rate_limit)
 ):
     """
     Create a new client.
@@ -64,40 +69,100 @@ async def create_client(
 
 @router.get("", response_model=dict)
 async def list_clients(
+    request: Request,
     user_id: Annotated[str, Depends(get_current_user_id)],
     repository: Annotated[SQLAlchemyClientRepository, Depends(get_client_repository)],
-    limit: int = Query(50, ge=1, le=100, description="Number of clients to return"),
-    offset: int = Query(0, ge=0, description="Number of clients to skip"),
+    pagination: PaginationParams = Depends(),
+    search: Optional[str] = Query(None, description="Search clients by name"),
     status: Optional[str] = Query(None, description="Filter by client status"),
-    search: Optional[str] = Query(None, description="Search clients by name")
+    company_type: Optional[str] = Query(None, description="Filter by company type"),
+    industry: Optional[str] = Query(None, description="Filter by industry"),
+    sort_by: str = Query("updated_at", description="Field to sort by"),
+    sort_order: str = Query("desc", description="Sort order (asc/desc)")
 ):
     """
-    List clients for the authenticated user.
+    List clients with efficient pagination and filtering.
     
-    - **limit**: Maximum number of clients to return (1-100, default 50)
-    - **offset**: Number of clients to skip for pagination
-    - **status**: Filter by client status (active, inactive, archived)
+    - **page**: Page number (1-based)
+    - **page_size**: Number of clients to return (1-100, default 50)
+    - **cursor**: Cursor for cursor-based pagination
     - **search**: Search clients by name
+    - **status**: Filter by client status (active, inactive, archived)
+    - **company_type**: Filter by company type
+    - **industry**: Filter by industry
+    - **sort_by**: Field to sort by
+    - **sort_order**: Sort order (asc/desc)
     """
     try:
         use_case = ListClientsUseCase(repository)
         
-        if search:
-            clients = await use_case.search_by_name(user_id, search, limit)
-            total = len(clients)  # Simplified - in production you'd get actual count
-        elif status:
-            clients = await use_case.list_by_status(user_id, status)
-            total = len(clients)
-        else:
-            clients = await use_case.execute(user_id, limit, offset)
-            total = await use_case.get_total_count(user_id)
-        
-        return dict(
-            clients=[ClientResponseDTO.from_domain(client) for client in clients],
-            total=total,
-            limit=limit,
-            offset=offset
+        # Build base query
+        base_query = repository.get_base_query().filter(
+            repository.model.owner_id == user_id
         )
+        
+        # Apply filters
+        filters = {}
+        if status:
+            filters['status'] = status
+        if company_type:
+            filters['company_type'] = company_type
+        if industry:
+            filters['industry'] = industry
+        
+        # Use smart pagination with search
+        if search or filters:
+            result = PaginationHelper.create_search_pagination(
+                base_query=base_query,
+                search_term=search,
+                search_fields=['name', 'contact_name', 'email'] if search else None,
+                filters=filters,
+                page=pagination.page,
+                page_size=pagination.page_size
+            )
+            
+            clients = [ClientResponseDTO.from_domain(client) for client in result['items']]
+            
+            return {
+                "clients": clients,
+                "pagination": {
+                    "page": result['metadata'].page,
+                    "page_size": result['metadata'].page_size,
+                    "total_items": result['metadata'].total_items,
+                    "total_pages": result['metadata'].total_pages,
+                    "has_next": result['metadata'].has_next,
+                    "has_previous": result['metadata'].has_previous
+                },
+                "search": result.get('search'),
+                "_links": PaginationHelper.get_pagination_links(
+                    base_url=str(request.url).split('?')[0],
+                    current_page=result['metadata'].page,
+                    total_pages=result['metadata'].total_pages,
+                    page_size=result['metadata'].page_size,
+                    search=search,
+                    status=status,
+                    company_type=company_type,
+                    industry=industry,
+                    sort_by=sort_by,
+                    sort_order=sort_order
+                )
+            }
+        else:
+            # Use smart pagination for simple listing
+            result = smart_paginator.paginate(
+                query=base_query,
+                page=pagination.page,
+                page_size=pagination.page_size,
+                cursor=pagination.cursor,
+                direction=pagination.direction
+            )
+            
+            clients = [ClientResponseDTO.from_domain(client) for client in result['items']]
+            
+            return {
+                "clients": clients,
+                "pagination": result['pagination']
+            }
         
     except ValidationError as e:
         raise HTTPException(

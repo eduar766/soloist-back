@@ -3,7 +3,7 @@ Client repository implementation using SQLAlchemy.
 """
 
 from typing import Optional, List
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, Query, joinedload
 from sqlalchemy import func
 
 from app.domain.models.client import Client
@@ -19,6 +19,7 @@ class SQLAlchemyClientRepository(ClientRepositoryInterface):
     def __init__(self, session: Session):
         self.session = session
         self.mapper = ClientMapper()
+        self.model = ClientModel
     
     def save(self, client: Client) -> Client:
         """Save a client entity."""
@@ -136,4 +137,45 @@ class SQLAlchemyClientRepository(ClientRepositoryInterface):
             status=status
         ).all()
         
+        return [self.mapper.model_to_domain(model) for model in models]
+    
+    def get_base_query(self) -> Query:
+        """Get base query for client model."""
+        return self.session.query(ClientModel)
+    
+    def get_with_projects(self, client_id: int) -> Optional[Client]:
+        """Get client with eager-loaded projects to prevent N+1 queries."""
+        model = self.session.query(ClientModel).options(
+            joinedload(ClientModel.projects)
+        ).filter_by(id=client_id).first()
+        
+        if not model:
+            return None
+        
+        return self.mapper.model_to_domain(model)
+    
+    def get_with_invoices(self, client_id: int) -> Optional[Client]:
+        """Get client with eager-loaded invoices to prevent N+1 queries."""
+        model = self.session.query(ClientModel).options(
+            joinedload(ClientModel.invoices)
+        ).filter_by(id=client_id).first()
+        
+        if not model:
+            return None
+        
+        return self.mapper.model_to_domain(model)
+    
+    def get_clients_with_relationships(self, owner_id: str, limit: Optional[int] = None, offset: int = 0) -> List[Client]:
+        """Get clients with all relationships eager-loaded to prevent N+1 queries."""
+        query = self.session.query(ClientModel).options(
+            joinedload(ClientModel.projects),
+            joinedload(ClientModel.invoices)
+        ).filter_by(owner_id=owner_id)
+        
+        if offset:
+            query = query.offset(offset)
+        if limit:
+            query = query.limit(limit)
+        
+        models = query.all()
         return [self.mapper.model_to_domain(model) for model in models]

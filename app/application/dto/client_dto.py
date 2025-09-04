@@ -11,6 +11,9 @@ from .base_dto import (
     RequestDTO, ResponseDTO, CreateRequestDTO, UpdateRequestDTO,
     ListRequestDTO, FilterRequestDTO, TimestampMixin, TagsMixin, NotesMixin
 )
+from app.infrastructure.validation.validators import (
+    SecurityValidator, DataValidator, BusinessValidator
+)
 
 
 # Nested DTOs
@@ -18,7 +21,7 @@ class ContactInfoRequestDTO(RequestDTO):
     """DTO for contact information in requests."""
     
     contact_name: Optional[str] = Field(default=None, max_length=255, description="Contact person name")
-    email: Optional[EmailStr] = Field(default=None, description="Contact email")
+    email: Optional[str] = Field(default=None, description="Contact email")
     phone: Optional[str] = Field(default=None, max_length=20, description="Phone number")
     mobile: Optional[str] = Field(default=None, max_length=20, description="Mobile number")
     address: Optional[str] = Field(default=None, max_length=500, description="Address")
@@ -27,6 +30,37 @@ class ContactInfoRequestDTO(RequestDTO):
     country: Optional[str] = Field(default=None, max_length=100, description="Country")
     postal_code: Optional[str] = Field(default=None, max_length=20, description="Postal code")
     website: Optional[str] = Field(default=None, max_length=255, description="Website URL")
+    
+    @validator('contact_name', 'address', 'city', 'state', 'country', pre=True)
+    def validate_safe_strings(cls, v):
+        if v is not None:
+            SecurityValidator.check_sql_injection(v)
+            SecurityValidator.check_xss(v)
+        return v
+    
+    @validator('email', pre=True)
+    def validate_email(cls, v):
+        if v is not None:
+            return DataValidator.validate_email(v)
+        return v
+    
+    @validator('phone', 'mobile', pre=True)
+    def validate_phone(cls, v):
+        if v is not None:
+            return DataValidator.validate_phone(v, region='US')
+        return v
+    
+    @validator('postal_code', pre=True)
+    def validate_postal_code(cls, v):
+        if v is not None:
+            return DataValidator.validate_postal_code(v)
+        return v
+    
+    @validator('website', pre=True)
+    def validate_website(cls, v):
+        if v is not None:
+            return DataValidator.validate_url(v)
+        return v
 
 
 class ContactInfoResponseDTO(ResponseDTO):
@@ -61,6 +95,33 @@ class CreateClientRequestDTO(CreateRequestDTO, TagsMixin, NotesMixin):
     default_hourly_rate: Optional[float] = Field(default=None, ge=0, description="Default hourly rate")
     payment_terms: str = Field(default="NET_30", description="Payment terms")
     custom_payment_terms: Optional[str] = Field(default=None, max_length=255, description="Custom payment terms")
+    
+    @validator('name', pre=True)
+    def validate_name(cls, v):
+        return BusinessValidator.validate_client_name(v)
+    
+    @validator('tax_id', pre=True)
+    def validate_tax_id(cls, v):
+        if v is not None:
+            return DataValidator.validate_tax_id(v)
+        return v
+    
+    @validator('company_type', 'industry', 'custom_payment_terms', pre=True)
+    def validate_safe_strings(cls, v):
+        if v is not None:
+            SecurityValidator.check_sql_injection(v)
+            SecurityValidator.check_xss(v)
+        return v
+    
+    @validator('default_currency', pre=True)
+    def validate_currency(cls, v):
+        return DataValidator.validate_currency_code(v)
+    
+    @validator('default_hourly_rate', pre=True)
+    def validate_hourly_rate(cls, v):
+        if v is not None:
+            return BusinessValidator.validate_hourly_rate(v)
+        return v
     
     @validator('payment_terms')
     def validate_payment_terms(cls, v, values):

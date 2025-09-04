@@ -9,6 +9,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import NullPool
 
 from app.config import settings
+from app.infrastructure.db.query_monitor import setup_query_monitoring
 
 
 # Create SQLAlchemy engine
@@ -27,6 +28,10 @@ SessionLocal = sessionmaker(
 
 # Create declarative base
 Base = declarative_base()
+
+# Set up query monitoring for development/debugging
+if settings.debug:
+    setup_query_monitoring(engine)
 
 
 def get_db() -> Generator[Session, None, None]:

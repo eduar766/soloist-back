@@ -19,6 +19,7 @@ class SQLAlchemyTaskRepository(TaskRepositoryInterface):
     def __init__(self, session: Session):
         self.session = session
         self.mapper = TaskMapper()
+        self.model = TaskModel
     
     def save(self, task: Task) -> Task:
         """Save a task entity."""
@@ -177,3 +178,22 @@ class SQLAlchemyTaskRepository(TaskRepositoryInterface):
                 id=task_id,
                 project_id=project_id
             ).update({"position": position})
+    
+    def get_base_query(self):
+        """Get base query for task model."""
+        return self.session.query(TaskModel)
+    
+    def get_with_relationships(self, task_id: int) -> Optional[Task]:
+        """Get task with all relationships eager-loaded to prevent N+1 queries."""
+        model = self.session.query(TaskModel).options(
+            joinedload(TaskModel.project),
+            joinedload(TaskModel.assignee),
+            joinedload(TaskModel.creator),
+            joinedload(TaskModel.time_entries),
+            joinedload(TaskModel.comments)
+        ).filter_by(id=task_id).first()
+        
+        if not model:
+            return None
+        
+        return self.mapper.model_to_domain(model)

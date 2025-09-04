@@ -15,6 +15,7 @@ from app.infrastructure.auth import (
 from app.infrastructure.auth.dependencies import get_auth_service
 from app.infrastructure.auth.jwt_handler import JWTHandler
 from app.domain.models.base import ValidationError
+from app.infrastructure.rate_limiting import auth_rate_limit, strict_rate_limit
 
 
 router = APIRouter()
@@ -61,7 +62,8 @@ class AuthResponse(BaseModel):
 @router.post("/register", status_code=status.HTTP_201_CREATED, response_model=AuthResponse)
 async def register(
     request: RegisterRequest,
-    auth_service: Annotated[SupabaseAuthService, Depends(get_auth_service)]
+    auth_service: Annotated[SupabaseAuthService, Depends(get_auth_service)],
+    _: None = Depends(auth_rate_limit)
 ):
     """
     Register a new user account.
@@ -110,7 +112,8 @@ async def register(
 @router.post("/login", response_model=AuthResponse)
 async def login(
     request: LoginRequest,
-    auth_service: Annotated[SupabaseAuthService, Depends(get_auth_service)]
+    auth_service: Annotated[SupabaseAuthService, Depends(get_auth_service)],
+    _: None = Depends(auth_rate_limit)
 ):
     """
     Authenticate user and return access tokens.

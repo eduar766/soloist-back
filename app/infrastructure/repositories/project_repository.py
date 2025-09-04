@@ -19,6 +19,7 @@ class SQLAlchemyProjectRepository(ProjectRepositoryInterface):
     def __init__(self, session: Session):
         self.session = session
         self.mapper = ProjectMapper()
+        self.model = ProjectModel
     
     def save(self, project: Project) -> Project:
         """Save a project entity."""
@@ -157,3 +158,20 @@ class SQLAlchemyProjectRepository(ProjectRepositoryInterface):
         ).all()
         
         return [self.mapper.model_to_domain(model) for model in models]
+    
+    def get_base_query(self):
+        """Get base query for project model."""
+        return self.session.query(ProjectModel)
+    
+    def get_with_all_relationships(self, project_id: int) -> Optional[Project]:
+        """Get project with all relationships eager-loaded to prevent N+1 queries."""
+        model = self.session.query(ProjectModel).options(
+            joinedload(ProjectModel.client),
+            joinedload(ProjectModel.tasks),
+            joinedload(ProjectModel.time_entries)
+        ).filter_by(id=project_id).first()
+        
+        if not model:
+            return None
+        
+        return self.mapper.model_to_domain(model)
