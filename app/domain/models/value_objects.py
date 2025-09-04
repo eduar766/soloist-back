@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 from dataclasses import dataclass
 from enum import Enum
 import re
-from email_validator import validate_email, EmailNotValidError
 
 
 class Currency(str, Enum):
@@ -325,14 +324,10 @@ class Email:
     address: str
     
     def __post_init__(self):
-        """Validate the email address."""
-        try:
-            # Use email-validator library for comprehensive validation
-            validated_email = validate_email(self.address)
-            # Update with normalized email
-            object.__setattr__(self, 'address', validated_email.email)
-        except EmailNotValidError as e:
-            raise ValueError(f"Invalid email address: {e}")
+        """Validate the email address using basic regex."""
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, self.address):
+            raise ValueError(f"Invalid email address: {self.address}")
     
     @classmethod
     def from_string(cls, email_str: str) -> "Email":

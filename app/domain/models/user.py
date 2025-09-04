@@ -109,9 +109,9 @@ class User(AggregateRoot):
     Represents a system user with authentication and profile information.
     """
     
-    # Required fields
-    user_id: str  # UUID from Supabase Auth
-    email: Email
+    # Required fields (using None as default but will be set in __post_init__)
+    user_id: Optional[str] = None  # UUID from Supabase Auth
+    email: Optional[Email] = None
     
     # Profile fields
     full_name: Optional[str] = None
