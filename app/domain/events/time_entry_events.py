@@ -10,7 +10,7 @@ from datetime import datetime, date
 from .base import DomainEvent
 
 
-@dataclass
+
 class TimeEntryCreated(DomainEvent):
     """Event fired when a new time entry is created."""
     
@@ -34,7 +34,7 @@ class TimeEntryCreated(DomainEvent):
         }
 
 
-@dataclass
+
 class WeeklyTimeReport(DomainEvent):
     """Event fired for weekly time tracking reports."""
     
@@ -56,7 +56,7 @@ class WeeklyTimeReport(DomainEvent):
         }
 
 
-@dataclass
+
 class MonthlyTimeReport(DomainEvent):
     """Event fired for monthly time tracking reports."""
     
@@ -82,7 +82,7 @@ class MonthlyTimeReport(DomainEvent):
         }
 
 
-@dataclass
+
 class TimeEntryApproved(DomainEvent):
     """Event fired when a time entry is approved by client."""
     
@@ -104,7 +104,7 @@ class TimeEntryApproved(DomainEvent):
         }
 
 
-@dataclass
+
 class LongTimeEntryDetected(DomainEvent):
     """Event fired when unusually long time entries are detected."""
     

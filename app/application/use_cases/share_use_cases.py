@@ -24,7 +24,7 @@ from app.domain.models.share import (
 from app.domain.repositories.share_repository import ShareRepository
 from app.domain.repositories.project_repository import ProjectRepository
 from app.domain.repositories.invoice_repository import InvoiceRepository
-from app.domain.repositories.user_repository import UserRepository
+from app.domain.repositories.user_repository import UserRepositoryInterface as UserRepository
 from app.domain.services.sharing_service import SharingService
 
 

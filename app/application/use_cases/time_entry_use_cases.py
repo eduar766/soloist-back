@@ -26,8 +26,8 @@ from app.domain.models.time_entry import (
 from app.domain.repositories.time_entry_repository import TimeEntryRepository
 from app.domain.repositories.project_repository import ProjectRepository
 from app.domain.repositories.task_repository import TaskRepository
-from app.domain.repositories.user_repository import UserRepository
-from app.domain.services.time_tracking_service import TimeTrackingService
+from app.domain.repositories.user_repository import UserRepositoryInterface as UserRepository
+# from app.domain.services.time_tracking_service import TimeTrackingService
 
 
 class StartTimerUseCase(AuthorizedUseCase, CreateUseCase[StartTimerRequestDTO, RunningTimerResponseDTO]):
@@ -38,13 +38,13 @@ class StartTimerUseCase(AuthorizedUseCase, CreateUseCase[StartTimerRequestDTO, R
         time_entry_repository: TimeEntryRepository,
         project_repository: ProjectRepository,
         task_repository: TaskRepository,
-        time_tracking_service: TimeTrackingService
+        # time_tracking_service: TimeTrackingService
     ):
         super().__init__()
         self.time_entry_repository = time_entry_repository
         self.project_repository = project_repository
         self.task_repository = task_repository
-        self.time_tracking_service = time_tracking_service
+        # self.time_tracking_service = time_tracking_service
     
     async def _execute_command_logic(self, request: StartTimerRequestDTO) -> RunningTimerResponseDTO:
         # Verify project and access
@@ -102,11 +102,11 @@ class StopTimerUseCase(AuthorizedUseCase, UpdateUseCase[StopTimerRequestDTO, Tim
     def __init__(
         self, 
         time_entry_repository: TimeEntryRepository,
-        time_tracking_service: TimeTrackingService
+        # time_tracking_service: TimeTrackingService
     ):
         super().__init__()
         self.time_entry_repository = time_entry_repository
-        self.time_tracking_service = time_tracking_service
+        # self.time_tracking_service = time_tracking_service
     
     async def _execute_command_logic(self, request: StopTimerRequestDTO) -> TimeEntryResponseDTO:
         # Get time entry
@@ -639,11 +639,11 @@ class GetTimeTrackingAnalyticsUseCase(AuthorizedUseCase, GetByIdUseCase[int, Tim
     def __init__(
         self, 
         time_entry_repository: TimeEntryRepository,
-        time_tracking_service: TimeTrackingService
+        # time_tracking_service: TimeTrackingService
     ):
         super().__init__()
         self.time_entry_repository = time_entry_repository
-        self.time_tracking_service = time_tracking_service
+        # self.time_tracking_service = time_tracking_service
     
     async def _execute_business_logic(self, user_id: int) -> TimeTrackingAnalyticsResponseDTO:
         # Check authorization

@@ -5,7 +5,7 @@ Share mapper for converting between domain entities and database models.
 import json
 from typing import Optional
 
-from app.domain.models.share import Share, ShareStatus, SharePermission
+from app.domain.models.share import Share, ShareStatus, SharePermissions
 from app.infrastructure.db.models import ShareModel
 
 
@@ -40,9 +40,9 @@ class ShareMapper:
         if model.permissions:
             try:
                 permission_values = json.loads(model.permissions)
-                permissions = [SharePermission(p) for p in permission_values]
+                permissions = [SharePermissions(p) for p in permission_values]
             except (json.JSONDecodeError, TypeError):
-                permissions = [SharePermission.READ]
+                permissions = [SharePermissions.READ]
         
         share = Share(
             owner_id=model.owner_id,

@@ -25,17 +25,17 @@ from app.config import settings
 from app.infrastructure.web.middleware.error_handler import ErrorHandlerMiddleware
 from app.infrastructure.web.middleware.auth_middleware import AuthenticationMiddleware
 from app.infrastructure.web.routers import (
-    auth,
+    # auth,
     clients,
-    projects,
-    tasks,
-    time_entries,
-    invoices,
-    shares,
-    templates,
-    uploads,
-    storage_admin,
-    notifications
+    # projects,
+    # tasks,
+    # time_entries,
+    # invoices,
+    # shares,
+    # templates,
+    # uploads,
+    # storage_admin,
+    # notifications
 )
 
 # Configure logging
@@ -127,61 +127,61 @@ def create_application() -> FastAPI:
     app.add_middleware(ErrorHandlerMiddleware)
     
     # Include routers
-    app.include_router(
-        auth.router,
-        prefix=f"{settings.api_prefix}/auth",
-        tags=["Authentication"]
-    )
+    # app.include_router(
+    #     auth.router,
+    #     prefix=f"{settings.api_prefix}/auth",
+    #     tags=["Authentication"]
+    # )
     app.include_router(
         clients.router,
         prefix=f"{settings.api_prefix}/clients",
         tags=["Clients"]
     )
-    app.include_router(
-        projects.router,
-        prefix=f"{settings.api_prefix}/projects",
-        tags=["Projects"]
-    )
-    app.include_router(
-        tasks.router,
-        prefix=f"{settings.api_prefix}/tasks",
-        tags=["Tasks"]
-    )
-    app.include_router(
-        time_entries.router,
-        prefix=f"{settings.api_prefix}/time-entries",
-        tags=["Time Tracking"]
-    )
-    app.include_router(
-        invoices.router,
-        prefix=f"{settings.api_prefix}/invoices",
-        tags=["Invoices"]
-    )
-    app.include_router(
-        shares.router,
-        prefix=f"{settings.api_prefix}/shares",
-        tags=["Sharing"]
-    )
-    app.include_router(
-        templates.router,
-        prefix=f"{settings.api_prefix}/templates",
-        tags=["Templates & PDFs"]
-    )
-    app.include_router(
-        uploads.router,
-        prefix=f"{settings.api_prefix}/uploads",
-        tags=["File Uploads"]
-    )
-    app.include_router(
-        storage_admin.router,
-        prefix=f"{settings.api_prefix}/storage",
-        tags=["Storage Management"]
-    )
-    app.include_router(
-        notifications.router,
-        prefix=f"{settings.api_prefix}/notifications",
-        tags=["Notifications & Events"]
-    )
+    # app.include_router(
+    #     projects.router,
+    #     prefix=f"{settings.api_prefix}/projects",
+    #     tags=["Projects"]
+    # )
+    # app.include_router(
+    #     tasks.router,
+    #     prefix=f"{settings.api_prefix}/tasks",
+    #     tags=["Tasks"]
+    # )
+    # app.include_router(
+    #     time_entries.router,
+    #     prefix=f"{settings.api_prefix}/time-entries",
+    #     tags=["Time Tracking"]
+    # )
+    # app.include_router(
+    #     invoices.router,
+    #     prefix=f"{settings.api_prefix}/invoices",
+    #     tags=["Invoices"]
+    # )
+    # app.include_router(
+    #     shares.router,
+    #     prefix=f"{settings.api_prefix}/shares",
+    #     tags=["Sharing"]
+    # )
+    # app.include_router(
+    #     templates.router,
+    #     prefix=f"{settings.api_prefix}/templates",
+    #     tags=["Templates & PDFs"]
+    # )
+    # app.include_router(
+    #     uploads.router,
+    #     prefix=f"{settings.api_prefix}/uploads",
+    #     tags=["File Uploads"]
+    # )
+    # app.include_router(
+    #     storage_admin.router,
+    #     prefix=f"{settings.api_prefix}/storage",
+    #     tags=["Storage Management"]
+    # )
+    # app.include_router(
+    #     notifications.router,
+    #     prefix=f"{settings.api_prefix}/notifications",
+    #     tags=["Notifications & Events"]
+    # )
     
     # Root endpoint
     @app.get("/")

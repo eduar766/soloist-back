@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, and_, or_, desc
 
 from app.domain.models.time_entry import TimeEntry
-from app.domain.repositories.time_entry_repository import TimeEntryRepositoryInterface
+from app.domain.repositories.time_entry_repository import TimeEntryRepository as TimeEntryRepositoryInterface
 from app.domain.models.base import EntityNotFoundError
 from app.infrastructure.db.models import TimeEntryModel
 from app.infrastructure.mappers.time_entry_mapper import TimeEntryMapper

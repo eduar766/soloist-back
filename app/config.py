@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     supabase_url: str = Field(default="https://example.supabase.co", description="Supabase project URL")
     supabase_anon_key: str = Field(default="temp-key", description="Supabase anonymous key")
     supabase_service_key: str = Field(default="temp-key", description="Supabase service role key")
+    supabase_jwt_secret: str = Field(default="temp-jwt-secret", description="Supabase JWT secret key")
     
     # Database (for direct connection if needed)
     database_url: Optional[str] = Field(default=None, description="Direct database URL")
@@ -159,6 +160,7 @@ class Settings(BaseSettings):
             "supabase_url",
             "supabase_anon_key",
             "supabase_service_key",
+            "supabase_jwt_secret",
             "jwt_secret_key"
         ]
         

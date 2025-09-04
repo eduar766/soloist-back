@@ -3,27 +3,32 @@ Authentication middleware for FastAPI.
 Handles JWT token validation and user context injection.
 """
 
-from typing import Optional
+from typing import Optional, Callable
 from fastapi import Request, Response, HTTPException, status
 from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 import time
 
 from app.infrastructure.auth.jwt_handler import JWTHandler
 from app.domain.models.base import ValidationError
 
 
-class AuthenticationMiddleware:
+class AuthenticationMiddleware(BaseHTTPMiddleware):
     """Middleware for JWT authentication."""
     
     def __init__(self, app, jwt_handler: Optional[JWTHandler] = None):
-        self.app = app
+        super().__init__(app)
         self.jwt_handler = jwt_handler or JWTHandler()
         
         # Public endpoints that don't require authentication
         self.public_endpoints = {
+            "/",
             "/docs",
             "/redoc", 
             "/openapi.json",
+            "/api/v1/docs",
+            "/api/v1/redoc",
+            "/api/v1/openapi.json",
             "/auth/login",
             "/auth/register",
             "/auth/refresh",
@@ -38,7 +43,7 @@ class AuthenticationMiddleware:
             "/shares/",  # Shared resources accessible via token
         ]
     
-    async def __call__(self, request: Request, call_next):
+    async def dispatch(self, request: Request, call_next):
         """Process request through authentication middleware."""
         start_time = time.time()
         
@@ -116,14 +121,14 @@ class AuthenticationMiddleware:
         )
 
 
-class OptionalAuthMiddleware:
+class OptionalAuthMiddleware(BaseHTTPMiddleware):
     """Middleware that optionally authenticates users but doesn't require it."""
     
     def __init__(self, app, jwt_handler: Optional[JWTHandler] = None):
-        self.app = app
+        super().__init__(app)
         self.jwt_handler = jwt_handler or JWTHandler()
     
-    async def __call__(self, request: Request, call_next):
+    async def dispatch(self, request: Request, call_next):
         """Process request with optional authentication."""
         # Always try to extract and validate token
         token = self._extract_token(request)

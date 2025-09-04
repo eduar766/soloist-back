@@ -197,42 +197,50 @@ class SharePermissions:
         }
 
 
-@dataclass
 class Share(BaseEntity):
     """
     Share entity.
     Represents a public sharing token for projects, invoices, time sheets, etc.
     """
     
-    # Required fields
-    created_by: str  # User ID who created the share
-    shareable_type: ShareableType
-    entity_id: int  # ID of the shared entity
-    
-    # Share configuration
-    token: str = field(default_factory=lambda: Share.generate_token())
-    share_type: ShareType = ShareType.PUBLIC
-    status: ShareStatus = ShareStatus.ACTIVE
-    
-    # Optional fields
-    title: Optional[str] = None
-    description: Optional[str] = None
-    password: Optional[str] = None  # For password-protected shares
-    
-    # Expiration
-    expires_at: Optional[datetime] = None
-    
-    # Permissions
-    permissions: SharePermissions = field(default_factory=SharePermissions)
-    
-    # Usage tracking
-    view_count: int = 0
-    last_accessed_at: Optional[datetime] = None
-    access_log: List[ShareAccess] = field(default_factory=list)
-    
-    # Metadata
-    custom_slug: Optional[str] = None  # Custom URL slug instead of token
-    tags: List[str] = field(default_factory=list)
+    def __init__(
+        self,
+        created_by: str,
+        shareable_type: ShareableType,
+        entity_id: int,
+        **kwargs
+    ):
+        super().__init__(**kwargs)
+        
+        # Required fields
+        self.created_by = created_by  # User ID who created the share
+        self.shareable_type = shareable_type
+        self.entity_id = entity_id  # ID of the shared entity
+        
+        # Share configuration
+        self.token = Share.generate_token()
+        self.share_type = ShareType.PUBLIC
+        self.status = ShareStatus.ACTIVE
+        
+        # Optional fields
+        self.title = None
+        self.description = None
+        self.password = None  # For password-protected shares
+        
+        # Expiration
+        self.expires_at = None
+        
+        # Permissions
+        self.permissions = SharePermissions()
+        
+        # Usage tracking
+        self.view_count = 0
+        self.last_accessed_at = None
+        self.access_log = []
+        
+        # Metadata
+        self.custom_slug = None  # Custom URL slug instead of token
+        self.tags = []
     
     def __post_init__(self):
         """Initialize share after creation."""

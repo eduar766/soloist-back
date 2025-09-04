@@ -4,25 +4,35 @@ Events for project lifecycle and status changes.
 """
 
 from typing import Dict, Any, Optional
-from dataclasses import dataclass
 from datetime import datetime
 
 from .base import DomainEvent
 
 
-@dataclass
 class ProjectCreated(DomainEvent):
     """Event fired when a new project is created."""
     
-    project_id: int
-    client_id: int
-    user_id: str
-    project_name: str
-    project_type: Optional[str] = None
-    budget: Optional[float] = None
-    currency: str = "USD"
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
+    def __init__(self,
+                 project_id: int,
+                 client_id: int,
+                 user_id: str,
+                 project_name: str,
+                 project_type: Optional[str] = None,
+                 budget: Optional[float] = None,
+                 currency: str = "USD",
+                 start_date: Optional[datetime] = None,
+                 end_date: Optional[datetime] = None,
+                 **kwargs):
+        super().__init__(**kwargs)
+        self.project_id = project_id
+        self.client_id = client_id
+        self.user_id = user_id
+        self.project_name = project_name
+        self.project_type = project_type
+        self.budget = budget
+        self.currency = currency
+        self.start_date = start_date
+        self.end_date = end_date
     
     def _get_event_data(self) -> Dict[str, Any]:
         return {
@@ -38,7 +48,7 @@ class ProjectCreated(DomainEvent):
         }
 
 
-@dataclass
+
 class ProjectStatusChanged(DomainEvent):
     """Event fired when a project status changes."""
     
@@ -62,7 +72,7 @@ class ProjectStatusChanged(DomainEvent):
         }
 
 
-@dataclass
+
 class ProjectCompleted(DomainEvent):
     """Event fired when a project is completed."""
     
@@ -88,7 +98,7 @@ class ProjectCompleted(DomainEvent):
         }
 
 
-@dataclass
+
 class ProjectMilestoneCompleted(DomainEvent):
     """Event fired when a project milestone is completed."""
     
@@ -112,7 +122,7 @@ class ProjectMilestoneCompleted(DomainEvent):
         }
 
 
-@dataclass
+
 class ProjectDeadlineApproaching(DomainEvent):
     """Event fired when a project deadline is approaching."""
     
@@ -136,7 +146,7 @@ class ProjectDeadlineApproaching(DomainEvent):
         }
 
 
-@dataclass
+
 class ProjectBudgetExceeded(DomainEvent):
     """Event fired when project costs exceed the budget."""
     

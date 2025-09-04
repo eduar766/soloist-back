@@ -156,7 +156,7 @@ class InvoiceLineItem:
             raise ValidationError("Rate cannot be negative", "rate")
         
         if abs(self.amount - (self.quantity * self.rate)) > 0.01:  # Allow small floating point errors
-            raise ValidationError("Amount must equal quantity × rate", "amount")
+            raise ValidationError("Amount must equal quantity * rate", "amount")
     
     def to_dict(self) -> dict:
         """Convert to dictionary."""
@@ -284,63 +284,74 @@ class InvoiceSettings:
         }
 
 
-@dataclass
 class Invoice(AggregateRoot):
     """
     Invoice aggregate root.
     Represents an invoice for time worked or services provided.
     """
     
-    # Required fields
-    client_id: int
-    project_id: int
-    created_by: str  # User ID who created the invoice
-    
-    # Invoice identification
-    invoice_number: InvoiceNumber
-    invoice_type: InvoiceType = InvoiceType.TIME_BASED
-    status: InvoiceStatus = InvoiceStatus.DRAFT
-    
-    # Dates
-    invoice_date: date = field(default_factory=date.today)
-    due_date: date = field(default=None)
-    sent_date: Optional[date] = None
-    
-    # Financial information
-    currency: str = "USD"
-    line_items: List[InvoiceLineItem] = field(default_factory=list)
-    tax_items: List[TaxLineItem] = field(default_factory=list)
-    
-    # Calculated amounts
-    subtotal: float = 0
-    tax_total: float = 0
-    total: float = 0
-    
-    # Discount
-    discount_percentage: float = 0
-    discount_amount: float = 0
-    
-    # Payment information
-    payment_status: PaymentStatus = PaymentStatus.UNPAID
-    payment_records: List[PaymentRecord] = field(default_factory=list)
-    amount_paid: float = 0
-    
-    # Content
-    title: Optional[str] = None
-    description: Optional[str] = None
-    notes: Optional[str] = None
-    terms_and_conditions: Optional[str] = None
-    
-    # File references
-    pdf_url: Optional[str] = None
-    pdf_generated_at: Optional[datetime] = None
-    
-    # Sharing and access
-    public_url: Optional[str] = None
-    client_viewed_at: Optional[datetime] = None
-    
-    # Time entries included in this invoice
-    time_entry_ids: List[int] = field(default_factory=list)
+    def __init__(
+        self,
+        client_id: int,
+        project_id: int,
+        created_by: str,
+        invoice_number: InvoiceNumber,
+        invoice_type: InvoiceType = InvoiceType.TIME_BASED,
+        status: InvoiceStatus = InvoiceStatus.DRAFT,
+        **kwargs
+    ):
+        super().__init__(**kwargs)
+        
+        # Required fields
+        self.client_id = client_id
+        self.project_id = project_id
+        self.created_by = created_by  # User ID who created the invoice
+        
+        # Invoice identification
+        self.invoice_number = invoice_number
+        self.invoice_type = invoice_type
+        self.status = status
+        
+        # Dates
+        self.invoice_date = date.today()
+        self.due_date = None
+        self.sent_date = None
+        
+        # Financial information
+        self.currency = "USD"
+        self.line_items = []
+        self.tax_items = []
+        
+        # Calculated amounts
+        self.subtotal = 0.0
+        self.tax_total = 0.0
+        self.total = 0.0
+        
+        # Discount
+        self.discount_percentage = 0.0
+        self.discount_amount = 0.0
+        
+        # Payment information
+        self.payment_status = PaymentStatus.UNPAID
+        self.payment_records = []
+        self.amount_paid = 0.0
+        
+        # Content
+        self.title = None
+        self.description = None
+        self.notes = None
+        self.terms_and_conditions = None
+        
+        # File references
+        self.pdf_url = None
+        self.pdf_generated_at = None
+        
+        # Sharing and access
+        self.public_url = None
+        self.client_viewed_at = None
+        
+        # Time entries included in this invoice
+        self.time_entry_ids = []
     
     def __post_init__(self):
         """Initialize invoice after creation."""

@@ -15,7 +15,7 @@ import uuid
 logger = logging.getLogger(__name__)
 
 
-@dataclass
+
 class DomainEvent(ABC):
     """Base class for all domain events."""
     

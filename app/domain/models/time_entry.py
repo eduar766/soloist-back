@@ -93,50 +93,60 @@ class TimeEntryInvoicedEvent(DomainEvent):
         return "time_entry.invoiced"
 
 
-@dataclass
 class TimeEntry(BaseEntity):
     """
     TimeEntry entity.
     Represents a time tracking entry for a task or project.
     """
     
-    # Required fields
-    user_id: str
-    project_id: int
-    
-    # Optional task association
-    task_id: Optional[int] = None
-    
-    # Time tracking
-    time_range: Optional[TimeRange] = None
-    duration_minutes: int = 0  # For manual entries
-    
-    # Entry details
-    description: Optional[str] = None
-    entry_type: TimeEntryType = TimeEntryType.TIMER
-    status: TimeEntryStatus = TimeEntryStatus.STOPPED
-    
-    # Billing information
-    billable: bool = True
-    hourly_rate: Optional[float] = None
-    billable_amount: Optional[float] = None
-    
-    # Date information
-    date: date = field(default_factory=date.today)
-    
-    # Approval workflow
-    approved_by: Optional[str] = None
-    approved_at: Optional[datetime] = None
-    approved_duration: Optional[int] = None  # Approved minutes
-    rejection_reason: Optional[str] = None
-    
-    # Invoice association
-    invoice_id: Optional[int] = None
-    invoiced_at: Optional[datetime] = None
-    
-    # Metadata
-    tags: list[str] = field(default_factory=list)
-    notes: Optional[str] = None
+    def __init__(
+        self,
+        user_id: str,
+        project_id: int,
+        task_id: Optional[int] = None,
+        time_range: Optional[TimeRange] = None,
+        duration_minutes: int = 0,
+        **kwargs
+    ):
+        super().__init__(**kwargs)
+        
+        # Required fields
+        self.user_id = user_id
+        self.project_id = project_id
+        
+        # Optional task association
+        self.task_id = task_id
+        
+        # Time tracking
+        self.time_range = time_range
+        self.duration_minutes = duration_minutes  # For manual entries
+        
+        # Entry details
+        self.description = None
+        self.entry_type = TimeEntryType.TIMER
+        self.status = TimeEntryStatus.STOPPED
+        
+        # Billing information
+        self.billable = True
+        self.hourly_rate = None
+        self.billable_amount = None
+        
+        # Date information
+        self.date = date.today()
+        
+        # Approval workflow
+        self.approved_by = None
+        self.approved_at = None
+        self.approved_duration = None  # Approved minutes
+        self.rejection_reason = None
+        
+        # Invoice association
+        self.invoice_id = None
+        self.invoiced_at = None
+        
+        # Metadata
+        self.tags = []
+        self.notes = None
     
     def __post_init__(self):
         """Initialize time entry after creation."""

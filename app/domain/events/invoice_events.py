@@ -4,23 +4,31 @@ Events for invoice lifecycle management and notifications.
 """
 
 from typing import Dict, Any, Optional
-from dataclasses import dataclass
 from datetime import datetime
 
 from .base import DomainEvent
 
 
-@dataclass
 class InvoiceCreated(DomainEvent):
     """Event fired when a new invoice is created."""
     
-    invoice_id: int
-    client_id: int
-    user_id: str
-    invoice_number: str
-    total_amount: float
-    currency: str
-    due_date: Optional[datetime] = None
+    def __init__(self, 
+                 invoice_id: int,
+                 client_id: int,
+                 user_id: str,
+                 invoice_number: str,
+                 total_amount: float,
+                 currency: str,
+                 due_date: Optional[datetime] = None,
+                 **kwargs):
+        super().__init__(**kwargs)
+        self.invoice_id = invoice_id
+        self.client_id = client_id
+        self.user_id = user_id
+        self.invoice_number = invoice_number
+        self.total_amount = total_amount
+        self.currency = currency
+        self.due_date = due_date
     
     def _get_event_data(self) -> Dict[str, Any]:
         return {
@@ -34,7 +42,6 @@ class InvoiceCreated(DomainEvent):
         }
 
 
-@dataclass
 class InvoicePaid(DomainEvent):
     """Event fired when an invoice is marked as paid."""
     
@@ -62,7 +69,6 @@ class InvoicePaid(DomainEvent):
         }
 
 
-@dataclass
 class InvoiceOverdue(DomainEvent):
     """Event fired when an invoice becomes overdue."""
     
@@ -88,7 +94,6 @@ class InvoiceOverdue(DomainEvent):
         }
 
 
-@dataclass
 class InvoiceSent(DomainEvent):
     """Event fired when an invoice is sent to client."""
     
@@ -110,7 +115,6 @@ class InvoiceSent(DomainEvent):
         }
 
 
-@dataclass
 class InvoiceCancelled(DomainEvent):
     """Event fired when an invoice is cancelled."""
     

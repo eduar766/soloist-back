@@ -29,7 +29,7 @@ from app.domain.repositories.client_repository import ClientRepository
 from app.domain.repositories.project_repository import ProjectRepository
 from app.domain.repositories.time_entry_repository import TimeEntryRepository
 from app.domain.services.billing_service import BillingService
-from app.domain.services.invoice_service import InvoiceService
+# from app.domain.services.invoice_service import InvoiceService
 from app.domain.events.base import publish_event
 from app.domain.events.invoice_events import InvoiceCreated, InvoiceSent, InvoicePaid
 
@@ -306,11 +306,11 @@ class SendInvoiceUseCase(AuthorizedUseCase, UpdateUseCase[SendInvoiceRequestDTO,
     def __init__(
         self, 
         invoice_repository: InvoiceRepository,
-        invoice_service: InvoiceService
+        # invoice_service: InvoiceService
     ):
         super().__init__()
         self.invoice_repository = invoice_repository
-        self.invoice_service = invoice_service
+        # self.invoice_service = invoice_service
     
     async def _execute_command_logic(self, request: SendInvoiceRequestDTO) -> InvoiceResponseDTO:
         # Get invoice
@@ -556,11 +556,11 @@ class BulkSendInvoicesUseCase(AuthorizedUseCase, BulkUseCase[BulkSendInvoicesReq
     def __init__(
         self, 
         invoice_repository: InvoiceRepository,
-        invoice_service: InvoiceService
+        # invoice_service: InvoiceService
     ):
         super().__init__()
         self.invoice_repository = invoice_repository
-        self.invoice_service = invoice_service
+        # self.invoice_service = invoice_service
     
     async def _execute_business_logic(self, request: BulkSendInvoicesRequestDTO) -> dict:
         results = {"sent": 0, "errors": []}

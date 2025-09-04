@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, and_
 
 from app.domain.models.share import Share
-from app.domain.repositories.share_repository import ShareRepositoryInterface
+from app.domain.repositories.share_repository import ShareRepository as ShareRepositoryInterface
 from app.domain.models.base import EntityNotFoundError, DuplicateEntityError
 from app.infrastructure.db.models import ShareModel
 from app.infrastructure.mappers.share_mapper import ShareMapper

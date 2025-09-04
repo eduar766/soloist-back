@@ -185,48 +185,74 @@ class BillingConfiguration:
         }
 
 
-@dataclass
 class Project(AggregateRoot):
     """
     Project aggregate root.
     Represents a project for a client with team members, tasks and billing.
     """
     
-    # Required fields
-    owner_id: str  # UUID of the freelancer who owns this project
-    client_id: int
-    name: str
-    
-    # Project details
-    description: Optional[str] = None
-    project_type: ProjectType = ProjectType.HOURLY
-    status: ProjectStatus = ProjectStatus.PLANNING
-    
-    # Dates
-    start_date: Optional[date] = None
-    end_date: Optional[date] = None
-    deadline: Optional[date] = None
-    
-    # Billing configuration
-    billing: BillingConfiguration = field(default_factory=lambda: BillingConfiguration(BillingType.HOURLY))
-    
-    # Team and permissions
-    members: List[ProjectMember] = field(default_factory=list)
-    
-    # Additional information
-    tags: List[str] = field(default_factory=list)
-    notes: Optional[str] = None
-    
-    # Statistics (computed fields)
-    total_tasks: int = 0
-    completed_tasks: int = 0
-    total_hours: float = 0
-    total_cost: float = 0
-    budget_used_percentage: float = 0
-    
-    # Visibility and sharing
-    is_public: bool = False
-    public_token: Optional[str] = None
+    def __init__(
+        self,
+        owner_id: str,
+        client_id: int,
+        name: str,
+        description: Optional[str] = None,
+        project_type: ProjectType = ProjectType.HOURLY,
+        status: ProjectStatus = ProjectStatus.PLANNING,
+        start_date: Optional[date] = None,
+        end_date: Optional[date] = None,
+        deadline: Optional[date] = None,
+        billing: Optional[BillingConfiguration] = None,
+        members: Optional[List[ProjectMember]] = None,
+        tags: Optional[List[str]] = None,
+        notes: Optional[str] = None,
+        total_tasks: int = 0,
+        **kwargs
+    ):
+        super().__init__(**kwargs)
+        
+        # Required fields
+        self.owner_id = owner_id
+        self.client_id = client_id
+        self.name = name
+        
+        # Project details
+        self.description = description
+        self.project_type = project_type
+        self.status = status
+        
+        # Dates
+        self.start_date = start_date
+        self.end_date = end_date
+        self.deadline = deadline
+        
+        # Billing configuration
+        self.billing = billing or BillingConfiguration(BillingType.HOURLY)
+        
+        # Team and permissions
+        self.members = members or []
+        
+        # Additional information
+        self.tags = tags or []
+        self.notes = notes
+        
+        # Statistics (computed fields)
+        self.total_tasks = total_tasks
+        self.completed_tasks = 0
+        self.total_hours = 0.0
+        self.total_cost = 0.0
+        self.budget_used_percentage = 0.0
+        
+        # Additional timestamps
+        self.started_at = None
+        self.completed_at = None
+        self.archived_at = None
+        self.budget = 0.0
+        self.currency = "USD"
+        
+        # Visibility and sharing
+        self.is_public = False
+        self.public_token = None
     
     def __post_init__(self):
         """Initialize project after creation."""

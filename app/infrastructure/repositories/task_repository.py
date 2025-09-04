@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, and_, or_
 
 from app.domain.models.task import Task
-from app.domain.repositories.task_repository import TaskRepositoryInterface
+from app.domain.repositories.task_repository import TaskRepository as TaskRepositoryInterface
 from app.domain.models.base import EntityNotFoundError
 from app.infrastructure.db.models import TaskModel
 from app.infrastructure.mappers.task_mapper import TaskMapper

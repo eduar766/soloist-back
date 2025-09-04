@@ -7,10 +7,14 @@ from .billing_service import BillingService
 from .timer_service import TimerService
 from .numbering_service import NumberingService
 from .sharing_service import SharingService
+from .auth_service import AuthService
+from .email_service import EmailService
 
 __all__ = [
     "BillingService",
     "TimerService", 
     "NumberingService",
     "SharingService",
+    "AuthService",
+    "EmailService",
 ]

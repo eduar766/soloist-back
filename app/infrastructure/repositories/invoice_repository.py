@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, and_, desc
 
 from app.domain.models.invoice import Invoice
-from app.domain.repositories.invoice_repository import InvoiceRepositoryInterface
+from app.domain.repositories.invoice_repository import InvoiceRepository as InvoiceRepositoryInterface
 from app.domain.models.base import EntityNotFoundError, DuplicateEntityError
 from app.infrastructure.db.models import InvoiceModel
 from app.infrastructure.mappers.invoice_mapper import InvoiceMapper

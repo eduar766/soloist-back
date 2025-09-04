@@ -6,7 +6,7 @@ import json
 from typing import List, Optional
 
 from app.domain.models.invoice import (
-    Invoice, LineItem, TaxItem, PaymentRecord,
+    Invoice, InvoiceLineItem, TaxLineItem, PaymentRecord,
     InvoiceStatus, PaymentStatus, PaymentMethod
 )
 from app.infrastructure.db.models import (
@@ -86,9 +86,9 @@ class InvoiceMapper:
         
         return invoice
     
-    def _line_item_model_to_domain(self, model: InvoiceLineItemModel) -> LineItem:
+    def _line_item_model_to_domain(self, model: InvoiceLineItemModel) -> InvoiceLineItem:
         """Convert line item model to domain."""
-        return LineItem(
+        return InvoiceLineItem(
             description=model.description,
             quantity=model.quantity,
             unit_price=model.unit_price,
@@ -96,9 +96,9 @@ class InvoiceMapper:
             time_entry_id=model.time_entry_id
         )
     
-    def _tax_item_model_to_domain(self, model: TaxLineItemModel) -> TaxItem:
+    def _tax_item_model_to_domain(self, model: TaxLineItemModel) -> TaxLineItem:
         """Convert tax item model to domain."""
-        return TaxItem(
+        return TaxLineItem(
             name=model.name,
             rate=model.rate,
             amount=model.amount

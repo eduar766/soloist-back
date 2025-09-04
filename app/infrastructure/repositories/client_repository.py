@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from app.domain.models.client import Client
-from app.domain.repositories.client_repository import ClientRepositoryInterface
+from app.domain.repositories.client_repository import ClientRepository as ClientRepositoryInterface
 from app.domain.models.base import EntityNotFoundError, DuplicateEntityError
 from app.infrastructure.db.models import ClientModel
 from app.infrastructure.mappers.client_mapper import ClientMapper

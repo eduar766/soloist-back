@@ -18,7 +18,7 @@ from app.application.dto.user_dto import (
     UserTimeTrackingStatsDTO
 )
 from app.domain.models.user import User
-from app.domain.repositories.user_repository import UserRepository
+from app.infrastructure.repositories.user_repository import SQLAlchemyUserRepository as UserRepository
 from app.domain.services.auth_service import AuthService
 from app.domain.services.email_service import EmailService
 

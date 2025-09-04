@@ -8,6 +8,8 @@ from .project_repository import ProjectRepository
 from .task_repository import TaskRepository
 from .time_entry_repository import TimeEntryRepository
 from .invoice_repository import InvoiceRepository
+from .user_repository import UserRepositoryInterface
+from .share_repository import ShareRepository
 
 __all__ = [
     "ClientRepository",
@@ -15,4 +17,6 @@ __all__ = [
     "TaskRepository",
     "TimeEntryRepository",
     "InvoiceRepository",
+    "UserRepositoryInterface",
+    "ShareRepository",
 ]

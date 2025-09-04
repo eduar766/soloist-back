@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 
 from app.domain.models.project import Project
-from app.domain.repositories.project_repository import ProjectRepositoryInterface
+from app.domain.repositories.project_repository import ProjectRepository as ProjectRepositoryInterface
 from app.domain.models.base import EntityNotFoundError, DuplicateEntityError
 from app.infrastructure.db.models import ProjectModel
 from app.infrastructure.mappers.project_mapper import ProjectMapper

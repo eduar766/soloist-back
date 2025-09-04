@@ -7,20 +7,20 @@ from typing import Annotated, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 
 from app.infrastructure.auth import get_current_user_id
-from app.application.use_cases.client import (
+from app.application.use_cases.client_use_cases import (
     CreateClientUseCase,
     UpdateClientUseCase,
-    GetClientUseCase,
+    GetClientByIdUseCase,
     ListClientsUseCase,
     ArchiveClientUseCase
 )
-from app.application.dto.client import (
-    CreateClientRequest,
-    UpdateClientRequest,
-    ClientResponse,
-    ClientListResponse
+from app.application.dto.client_dto import (
+    CreateClientRequestDTO,
+    UpdateClientRequestDTO,
+    ClientResponseDTO,
+    ClientSummaryResponseDTO
 )
-from app.infrastructure.db.database import get_db_session
+from app.infrastructure.db.database import get_db
 from app.infrastructure.repositories.client_repository import SQLAlchemyClientRepository
 from app.domain.models.base import EntityNotFoundError, ValidationError
 
@@ -28,14 +28,14 @@ from app.domain.models.base import EntityNotFoundError, ValidationError
 router = APIRouter()
 
 
-def get_client_repository(session=Depends(get_db_session)):
+def get_client_repository(session=Depends(get_db)):
     """Dependency to get client repository."""
     return SQLAlchemyClientRepository(session)
 
 
-@router.post("", status_code=status.HTTP_201_CREATED, response_model=ClientResponse)
+@router.post("", status_code=status.HTTP_201_CREATED, response_model=ClientResponseDTO)
 async def create_client(
-    request: CreateClientRequest,
+    request: CreateClientRequestDTO,
     user_id: Annotated[str, Depends(get_current_user_id)],
     repository: Annotated[SQLAlchemyClientRepository, Depends(get_client_repository)]
 ):
@@ -53,7 +53,7 @@ async def create_client(
     try:
         use_case = CreateClientUseCase(repository)
         client = await use_case.execute(user_id, request)
-        return ClientResponse.from_domain(client)
+        return ClientResponseDTO.from_domain(client)
         
     except ValidationError as e:
         raise HTTPException(
@@ -62,7 +62,7 @@ async def create_client(
         )
 
 
-@router.get("", response_model=ClientListResponse)
+@router.get("", response_model=dict)
 async def list_clients(
     user_id: Annotated[str, Depends(get_current_user_id)],
     repository: Annotated[SQLAlchemyClientRepository, Depends(get_client_repository)],
@@ -92,8 +92,8 @@ async def list_clients(
             clients = await use_case.execute(user_id, limit, offset)
             total = await use_case.get_total_count(user_id)
         
-        return ClientListResponse(
-            clients=[ClientResponse.from_domain(client) for client in clients],
+        return dict(
+            clients=[ClientResponseDTO.from_domain(client) for client in clients],
             total=total,
             limit=limit,
             offset=offset
@@ -106,7 +106,7 @@ async def list_clients(
         )
 
 
-@router.get("/{client_id}", response_model=ClientResponse)
+@router.get("/{client_id}", response_model=ClientResponseDTO)
 async def get_client(
     client_id: int,
     user_id: Annotated[str, Depends(get_current_user_id)],
@@ -120,7 +120,7 @@ async def get_client(
     try:
         use_case = GetClientUseCase(repository)
         client = await use_case.execute(user_id, client_id)
-        return ClientResponse.from_domain(client)
+        return ClientResponseDTO.from_domain(client)
         
     except EntityNotFoundError:
         raise HTTPException(
@@ -129,10 +129,10 @@ async def get_client(
         )
 
 
-@router.put("/{client_id}", response_model=ClientResponse)
+@router.put("/{client_id}", response_model=ClientResponseDTO)
 async def update_client(
     client_id: int,
-    request: UpdateClientRequest,
+    request: UpdateClientRequestDTO,
     user_id: Annotated[str, Depends(get_current_user_id)],
     repository: Annotated[SQLAlchemyClientRepository, Depends(get_client_repository)]
 ):
@@ -151,7 +151,7 @@ async def update_client(
     try:
         use_case = UpdateClientUseCase(repository)
         client = await use_case.execute(user_id, client_id, request)
-        return ClientResponse.from_domain(client)
+        return ClientResponseDTO.from_domain(client)
         
     except EntityNotFoundError:
         raise HTTPException(
@@ -194,7 +194,7 @@ async def archive_client(
         )
 
 
-@router.post("/{client_id}/reactivate", response_model=ClientResponse)
+@router.post("/{client_id}/reactivate", response_model=ClientResponseDTO)
 async def reactivate_client(
     client_id: int,
     user_id: Annotated[str, Depends(get_current_user_id)],
@@ -216,7 +216,7 @@ async def reactivate_client(
         # Save changes
         repository.save(client)
         
-        return ClientResponse.from_domain(client)
+        return ClientResponseDTO.from_domain(client)
         
     except EntityNotFoundError:
         raise HTTPException(

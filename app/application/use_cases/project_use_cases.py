@@ -25,9 +25,9 @@ from app.domain.models.project import (
 )
 from app.domain.repositories.project_repository import ProjectRepository
 from app.domain.repositories.client_repository import ClientRepository
-from app.domain.repositories.user_repository import UserRepository
+from app.domain.repositories.user_repository import UserRepositoryInterface as UserRepository
 from app.domain.services.billing_service import BillingService
-from app.domain.services.project_service import ProjectService
+# from app.domain.services.project_service import ProjectService
 from app.domain.events.base import publish_event
 from app.domain.events.project_events import ProjectCreated, ProjectStatusChanged, ProjectCompleted
 
@@ -564,12 +564,12 @@ class GetProjectAnalyticsUseCase(AuthorizedUseCase, GetByIdUseCase[int, ProjectA
     
     def __init__(
         self, 
-        project_repository: ProjectRepository, 
-        project_service: ProjectService
+        project_repository: ProjectRepository
+        # project_service: ProjectService
     ):
         super().__init__()
         self.project_repository = project_repository
-        self.project_service = project_service
+        # self.project_service = project_service
     
     async def _execute_business_logic(self, project_id: int) -> ProjectAnalyticsResponseDTO:
         # Get project

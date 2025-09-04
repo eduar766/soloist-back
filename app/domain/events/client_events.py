@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from .base import DomainEvent
 
 
-@dataclass
+
 class ClientRegistered(DomainEvent):
     """Event fired when a new client is registered."""
     
@@ -29,7 +29,7 @@ class ClientRegistered(DomainEvent):
         }
 
 
-@dataclass
+
 class ClientUpdated(DomainEvent):
     """Event fired when client information is updated."""
     
@@ -47,7 +47,7 @@ class ClientUpdated(DomainEvent):
         }
 
 
-@dataclass
+
 class ClientDeactivated(DomainEvent):
     """Event fired when a client is deactivated."""
     

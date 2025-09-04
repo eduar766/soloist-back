@@ -26,8 +26,8 @@ from app.domain.models.task import (
 )
 from app.domain.repositories.task_repository import TaskRepository
 from app.domain.repositories.project_repository import ProjectRepository
-from app.domain.repositories.user_repository import UserRepository
-from app.domain.services.task_service import TaskService
+from app.domain.repositories.user_repository import UserRepositoryInterface as UserRepository
+# from app.domain.services.task_service import TaskService
 
 
 class CreateTaskUseCase(AuthorizedUseCase, CreateUseCase[CreateTaskRequestDTO, TaskResponseDTO]):
@@ -651,12 +651,12 @@ class GetTaskAnalyticsUseCase(AuthorizedUseCase, GetByIdUseCase[int, TaskAnalyti
         self, 
         task_repository: TaskRepository,
         project_repository: ProjectRepository,
-        task_service: TaskService
+        # task_service: TaskService
     ):
         super().__init__()
         self.task_repository = task_repository
         self.project_repository = project_repository
-        self.task_service = task_service
+        # self.task_service = task_service
     
     async def _execute_business_logic(self, task_id: int) -> TaskAnalyticsResponseDTO:
         # Get task
@@ -672,7 +672,7 @@ class GetTaskAnalyticsUseCase(AuthorizedUseCase, GetByIdUseCase[int, TaskAnalyti
                 self._require_owner_or_role(project.owner_id, "admin")
         
         # Get analytics
-        analytics = await self.task_service.get_task_analytics(task_id)
+        # analytics = await self.task_service.get_task_analytics(task_id)
         
         return TaskAnalyticsResponseDTO(
             task_id=task.id,

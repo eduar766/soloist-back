@@ -147,53 +147,63 @@ class TaskAttachment:
         }
 
 
-@dataclass
 class Task(BaseEntity):
     """
     Task entity.
     Represents a task within a project with time tracking and status management.
     """
     
-    # Required fields
-    project_id: int
-    title: str
-    created_by: str
-    
-    # Task details
-    description: Optional[str] = None
-    task_type: TaskType = TaskType.OTHER
-    status: TaskStatus = TaskStatus.TODO
-    priority: TaskPriority = TaskPriority.MEDIUM
-    
-    # Assignment
-    assigned_to: Optional[str] = None
-    assigned_at: Optional[datetime] = None
-    
-    # Dates and time
-    due_date: Optional[date] = None
-    start_date: Optional[date] = None
-    completed_at: Optional[datetime] = None
-    
-    # Estimation and tracking
-    estimated_hours: Optional[float] = None
-    actual_hours: float = 0
-    billable: bool = True
-    
-    # Organization
-    tags: List[str] = field(default_factory=list)
-    board_position: int = 0  # For Kanban ordering
-    
-    # Relationships
-    parent_task_id: Optional[int] = None
-    subtasks: List[int] = field(default_factory=list)
-    
-    # Collaboration
-    comments: List[TaskComment] = field(default_factory=list)
-    attachments: List[TaskAttachment] = field(default_factory=list)
-    watchers: List[str] = field(default_factory=list)  # User IDs watching this task
-    
-    # Status tracking
-    status_history: List[Dict] = field(default_factory=list)
+    def __init__(
+        self,
+        project_id: int,
+        title: str,
+        created_by: str,
+        description: Optional[str] = None,
+        task_type: TaskType = TaskType.OTHER,
+        **kwargs
+    ):
+        super().__init__(**kwargs)
+        
+        # Required fields
+        self.project_id = project_id
+        self.title = title
+        self.created_by = created_by
+        
+        # Task details
+        self.description = description
+        self.task_type = task_type
+        self.status = TaskStatus.TODO
+        self.priority = TaskPriority.MEDIUM
+        
+        # Assignment
+        self.assigned_to = None
+        self.assigned_at = None
+        
+        # Dates and time
+        self.due_date = None
+        self.start_date = None
+        self.completed_at = None
+        
+        # Estimation and tracking
+        self.estimated_hours = None
+        self.actual_hours = 0.0
+        self.billable = True
+        
+        # Organization
+        self.tags = []
+        self.board_position = 0  # For Kanban ordering
+        
+        # Relationships
+        self.parent_task_id = None
+        self.subtasks = []
+        
+        # Collaboration
+        self.comments = []
+        self.attachments = []
+        self.watchers = []  # User IDs watching this task
+        
+        # Status tracking
+        self.status_history = []
     
     def __post_init__(self):
         """Initialize task after creation."""

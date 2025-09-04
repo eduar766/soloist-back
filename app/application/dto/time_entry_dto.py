@@ -328,7 +328,7 @@ class TimeEntryReportResponseDTO(ResponseDTO):
 class DailyTimeStatsDTO(ResponseDTO):
     """DTO for daily time statistics."""
     
-    date: date = Field(description="Date")
+    work_date: date = Field(description="Date")
     total_hours: float = Field(description="Total hours for day")
     billable_hours: float = Field(description="Billable hours for day")
     non_billable_hours: float = Field(description="Non-billable hours for day")

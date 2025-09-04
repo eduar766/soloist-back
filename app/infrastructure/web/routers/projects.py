@@ -7,7 +7,7 @@ from typing import Annotated, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 
 from app.infrastructure.auth import get_current_user_id
-from app.application.use_cases.project import (
+from app.application.use_cases.project_use_cases import (
     CreateProjectUseCase,
     UpdateProjectUseCase,
     GetProjectUseCase,
