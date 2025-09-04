@@ -1,0 +1,47 @@
+{{ app_name }}
+¡Pago Recibido! - {{ payment.invoice_number }}
+
+Hola {{ client_name }},
+
+¡Excelente! Hemos recibido tu pago correctamente.
+
+Nos complace confirmarte que hemos recibido tu pago por la factura {{ payment.invoice_number }}.
+
+DETALLES DEL PAGO:
+- Número de Factura: {{ payment.invoice_number }}
+- Monto Pagado: {{ payment.amount | currency(payment.currency) }}
+- Método de Pago: {{ payment.payment_method | capitalize_words }}
+- Fecha de Pago: {{ payment.payment_date | date }}
+{% if payment.transaction_id %}- ID de Transacción: {{ payment.transaction_id }}{% endif %}
+{% if payment.reference %}- Referencia: {{ payment.reference }}{% endif %}
+
+{% if payment.remaining_balance and payment.remaining_balance > 0 %}
+BALANCE PENDIENTE: Aún queda un saldo pendiente de {{ payment.remaining_balance | currency(payment.currency) }} en esta factura.
+{% else %}
+FACTURA COMPLETAMENTE PAGADA - Esta factura ha sido pagada en su totalidad.
+{% endif %}
+
+¿QUÉ SIGUE?
+Tu pago ha sido procesado exitosamente. Aquí tienes algunos pasos que puedes seguir:
+
+- Guarda este email como comprobante de pago
+- Descarga el recibo de pago si está disponible
+- Contáctanos si tienes alguna pregunta
+{% if payment.remaining_balance and payment.remaining_balance > 0 %}- Programa el pago del balance restante si es necesario{% endif %}
+
+{% if payment.receipt_url %}Para descargar tu recibo, visita: {{ payment.receipt_url }}{% endif %}
+
+INFORMACIÓN DE CONTACTO:
+Si necesitas asistencia o tienes preguntas sobre este pago:
+{% if company_email %}Email: {{ company_email }}{% endif %}
+{% if company_phone %}Teléfono: {{ company_phone }}{% endif %}
+{% if support_hours %}Horario: {{ support_hours }}{% endif %}
+
+{% if next_invoice_date %}PRÓXIMA FACTURA: Tu siguiente facturación está programada para el {{ next_invoice_date | date }}.{% endif %}
+
+¡Gracias por tu pago puntual!
+Valoramos mucho tu confianza en nuestros servicios.
+
+{{ company_name }}
+
+© {{ current_year }} {{ company_name or app_name }}. Todos los derechos reservados.

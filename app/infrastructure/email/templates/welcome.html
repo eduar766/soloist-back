@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}¡Bienvenido a {{ app_name }}!{% endblock %}
+
+{% block header_title %}¡Bienvenido!{% endblock %}
+{% block header_subtitle %}Tu sistema de gestión freelancer está listo{% endblock %}
+
+{% block content %}
+<div class="alert alert-success">
+    <strong>¡Felicidades!</strong> Tu cuenta ha sido creada exitosamente.
+</div>
+
+<div class="content-section">
+    <p>¡Nos complace darte la bienvenida a <strong>{{ app_name }}</strong>!</p>
+    <p>Ahora tienes acceso a una plataforma completa para gestionar tus proyectos freelance de manera profesional.</p>
+</div>
+
+<div class="content-section">
+    <h2>🚀 ¿Qué puedes hacer ahora?</h2>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #28a745;">
+            <h4 style="color: #28a745; margin: 0 0 10px 0;">👥 Gestionar Clientes</h4>
+            <p style="margin: 0; color: #666;">Agrega y organiza información de tus clientes, incluyendo datos de contacto y logos.</p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #007bff;">
+            <h4 style="color: #007bff; margin: 0 0 10px 0;">📋 Crear Proyectos</h4>
+            <p style="margin: 0; color: #666;">Organiza tu trabajo en proyectos con tareas, fechas límite y presupuestos.</p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #ffc107;">
+            <h4 style="color: #856404; margin: 0 0 10px 0;">⏱️ Registrar Tiempo</h4>
+            <p style="margin: 0; color: #666;">Lleva un control preciso del tiempo trabajado en cada proyecto y tarea.</p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #dc3545;">
+            <h4 style="color: #dc3545; margin: 0 0 10px 0;">💰 Generar Facturas</h4>
+            <p style="margin: 0; color: #666;">Crea facturas profesionales en PDF y gestiona el estado de pagos.</p>
+        </div>
+    </div>
+</div>
+
+<div class="content-section">
+    <h2>📚 Primeros Pasos Recomendados</h2>
+    
+    <ol style="color: #555; line-height: 1.8;">
+        <li><strong>Configura tu perfil de empresa:</strong> Agrega tu logo, información de contacto y datos fiscales.</li>
+        <li><strong>Agrega tu primer cliente:</strong> Importa la información de tus clientes actuales.</li>
+        <li><strong>Crea tu primer proyecto:</strong> Organiza tu trabajo actual en proyectos.</li>
+        <li><strong>Configura tus tarifas:</strong> Define tus precios por hora o proyecto.</li>
+        <li><strong>Prueba el sistema de tiempo:</strong> Registra algunas horas de trabajo.</li>
+        <li><strong>Genera tu primera factura:</strong> Crea una factura de prueba para familiarizarte.</li>
+    </ol>
+</div>
+
+{% if welcome_data.features %}
+<div class="content-section">
+    <h2>✨ Características Destacadas</h2>
+    
+    <ul style="color: #555; line-height: 1.8;">
+        {% for feature in welcome_data.features %}
+        <li><strong>{{ feature.name }}:</strong> {{ feature.description }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<div class="content-section" style="text-align: center;">
+    {% if welcome_data.dashboard_url %}
+    <a href="{{ welcome_data.dashboard_url }}" class="btn btn-success">Ir al Dashboard</a>
+    {% endif %}
+    
+    {% if welcome_data.tutorial_url %}
+    <a href="{{ welcome_data.tutorial_url }}" class="btn btn-secondary">Ver Tutorial</a>
+    {% endif %}
+</div>
+
+<div class="content-section">
+    <h2>📞 ¿Necesitas Ayuda?</h2>
+    
+    <p>Estamos aquí para ayudarte a sacar el máximo provecho de la plataforma:</p>
+    
+    <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h4 style="color: #1976d2; margin: 0 0 15px 0;">Recursos de Soporte</h4>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+                <strong>📧 Email de Soporte</strong><br>
+                <a href="mailto:{{ support_email or company_email }}">{{ support_email or company_email }}</a>
+            </div>
+            
+            <div>
+                <strong>📖 Documentación</strong><br>
+                <a href="{{ welcome_data.docs_url or '#' }}">Guías y Tutoriales</a>
+            </div>
+            
+            {% if support_phone %}
+            <div>
+                <strong>📞 Teléfono</strong><br>
+                {{ support_phone }}
+            </div>
+            {% endif %}
+            
+            {% if welcome_data.community_url %}
+            <div>
+                <strong>💬 Comunidad</strong><br>
+                <a href="{{ welcome_data.community_url }}">Foro de Usuarios</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="alert alert-info">
+    <strong>💡 Consejo:</strong> Te recomendamos comenzar con un proyecto pequeño para familiarizarte con todas las funcionalidades antes de migrar todo tu trabajo actual.
+</div>
+
+<div class="content-section">
+    <h2>🎯 Próximos Pasos</h2>
+    
+    <p>Para ayudarte a comenzar, hemos preparado algunas acciones que puedes realizar:</p>
+    
+    <div style="background: #fff3cd; padding: 20px; border-radius: 8px; border-left: 4px solid #ffc107; margin: 20px 0;">
+        <h4 style="color: #856404; margin: 0 0 10px 0;">Configuración Inicial</h4>
+        <ul style="margin: 0; color: #856404;">
+            <li>✅ Verificar tu email (ya completado)</li>
+            <li>⏳ Completar tu perfil de empresa</li>
+            <li>⏳ Configurar métodos de pago</li>
+            <li>⏳ Importar datos existentes</li>
+        </ul>
+    </div>
+</div>
+
+{% if welcome_data.special_offer %}
+<div class="alert alert-success">
+    <strong>🎉 Oferta Especial:</strong> {{ welcome_data.special_offer.description }}
+    {% if welcome_data.special_offer.expires_date %}
+    <br><small>Válida hasta: {{ welcome_data.special_offer.expires_date | date }}</small>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block signature %}
+<div class="content-section">
+    <p>¡Esperamos que disfrutes usando nuestra plataforma!</p>
+    <p>Estamos comprometidos a ayudarte a hacer crecer tu negocio freelance.</p>
+    <p><strong>El Equipo de {{ company_name or app_name }}</strong></p>
+</div>
+{% endblock %}

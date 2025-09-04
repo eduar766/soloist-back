@@ -28,6 +28,8 @@ from app.domain.repositories.client_repository import ClientRepository
 from app.domain.repositories.user_repository import UserRepository
 from app.domain.services.billing_service import BillingService
 from app.domain.services.project_service import ProjectService
+from app.domain.events.base import publish_event
+from app.domain.events.project_events import ProjectCreated, ProjectStatusChanged, ProjectCompleted
 
 
 class CreateProjectUseCase(AuthorizedUseCase, CreateUseCase[CreateProjectRequestDTO, ProjectResponseDTO]):
@@ -89,6 +91,19 @@ class CreateProjectUseCase(AuthorizedUseCase, CreateUseCase[CreateProjectRequest
         
         # Save project
         saved_project = await self.project_repository.save(project)
+        
+        # Publish project created event
+        await publish_event(ProjectCreated(
+            project_id=saved_project.id,
+            client_id=saved_project.client_id,
+            user_id=self.current_user_id,
+            project_name=saved_project.name,
+            project_type=saved_project.project_type.value if saved_project.project_type else None,
+            budget=float(saved_project.budget) if saved_project.budget else None,
+            currency=saved_project.currency,
+            start_date=saved_project.start_date,
+            end_date=saved_project.end_date
+        ))
         
         return await self._project_to_response_dto(saved_project)
 
@@ -174,6 +189,9 @@ class UpdateProjectStatusUseCase(AuthorizedUseCase, UpdateUseCase[UpdateProjectS
         if not member or not member.can_manage_project:
             self._require_owner_or_role(project.owner_id, "admin")
         
+        # Store old status for event
+        old_status = project.status.value
+        
         # Update status
         if request.status == ProjectStatus.COMPLETED:
             project.complete(completion_notes=request.notes)
@@ -186,6 +204,30 @@ class UpdateProjectStatusUseCase(AuthorizedUseCase, UpdateUseCase[UpdateProjectS
         
         # Save project
         saved_project = await self.project_repository.save(project)
+        
+        # Publish project status changed event
+        await publish_event(ProjectStatusChanged(
+            project_id=saved_project.id,
+            client_id=saved_project.client_id,
+            user_id=self.current_user_id,
+            project_name=saved_project.name,
+            old_status=old_status,
+            new_status=saved_project.status.value,
+            status_reason=request.notes
+        ))
+        
+        # If project completed, also publish completion event
+        if request.status == ProjectStatus.COMPLETED:
+            await publish_event(ProjectCompleted(
+                project_id=saved_project.id,
+                client_id=saved_project.client_id,
+                user_id=self.current_user_id,
+                project_name=saved_project.name,
+                completion_date=saved_project.completed_at or datetime.now(),
+                total_hours=None,  # Would need to calculate from time entries
+                total_cost=None,   # Would need to calculate from billing
+                currency=saved_project.currency
+            ))
         
         return await self._project_to_response_dto(saved_project)
 

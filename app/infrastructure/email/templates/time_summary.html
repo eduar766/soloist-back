@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}Resumen de Tiempo Trabajado - {{ period | capitalize_words }}{% endblock %}
+
+{% block header_title %}Resumen de Tiempo{% endblock %}
+{% block header_subtitle %}{{ period | capitalize_words }} - {{ summary.period_start | date }} al {{ summary.period_end | date }}{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <p>Te enviamos el resumen del tiempo trabajado durante el período {{ period }} correspondiente a tus proyectos.</p>
+</div>
+
+<div class="summary-box">
+    <h3>Resumen General</h3>
+    
+    <div class="summary-item">
+        <span>Período:</span>
+        <strong>{{ summary.period_start | date }} - {{ summary.period_end | date }}</strong>
+    </div>
+    
+    <div class="summary-item">
+        <span>Total de Horas:</span>
+        <strong>{{ summary.total_hours | duration }}</strong>
+    </div>
+    
+    <div class="summary-item">
+        <span>Total de Días Trabajados:</span>
+        <strong>{{ summary.working_days }}</strong>
+    </div>
+    
+    <div class="summary-item">
+        <span>Promedio Diario:</span>
+        <strong>{{ (summary.total_hours / summary.working_days) | duration }}</strong>
+    </div>
+    
+    {% if summary.billable_hours %}
+    <div class="summary-item">
+        <span>Horas Facturables:</span>
+        <strong>{{ summary.billable_hours | duration }}</strong>
+    </div>
+    {% endif %}
+    
+    {% if summary.total_amount %}
+    <div class="summary-item">
+        <span><strong>Monto Total:</strong></span>
+        <strong style="color: #28a745; font-size: 1.2em;">{{ summary.total_amount | currency(summary.currency) }}</strong>
+    </div>
+    {% endif %}
+</div>
+
+{% if summary.by_project and summary.by_project|length > 0 %}
+<div class="content-section">
+    <h2>Tiempo por Proyecto</h2>
+    
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Proyecto</th>
+                <th style="text-align: right;">Horas</th>
+                <th style="text-align: right;">Días</th>
+                {% if summary.show_rates %}
+                <th style="text-align: right;">Tarifa/Hora</th>
+                <th style="text-align: right;">Total</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for project in summary.by_project %}
+            <tr>
+                <td>
+                    <strong>{{ project.name }}</strong>
+                    {% if project.client_name %}
+                    <br><small style="color: #666;">Cliente: {{ project.client_name }}</small>
+                    {% endif %}
+                </td>
+                <td style="text-align: right;">{{ project.hours | duration }}</td>
+                <td style="text-align: right;">{{ project.days }}</td>
+                {% if summary.show_rates %}
+                <td style="text-align: right;">{{ project.hourly_rate | currency(summary.currency) }}</td>
+                <td style="text-align: right;">{{ project.total_amount | currency(summary.currency) }}</td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% if summary.by_task and summary.by_task|length > 0 %}
+<div class="content-section">
+    <h2>Tiempo por Tipo de Tarea</h2>
+    
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Tipo de Tarea</th>
+                <th style="text-align: right;">Horas</th>
+                <th style="text-align: right;">% del Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task_type in summary.by_task %}
+            <tr>
+                <td>{{ task_type.name | capitalize_words }}</td>
+                <td style="text-align: right;">{{ task_type.hours | duration }}</td>
+                <td style="text-align: right;">{{ ((task_type.hours / summary.total_hours) * 100) | round(1) }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% if summary.daily_breakdown %}
+<div class="content-section">
+    <h2>Desglose Diario</h2>
+    
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th style="text-align: right;">Horas Trabajadas</th>
+                <th>Proyectos</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for day in summary.daily_breakdown %}
+            {% if day.hours > 0 %}
+            <tr>
+                <td>{{ day.date | date }}</td>
+                <td style="text-align: right;">{{ day.hours | duration }}</td>
+                <td>
+                    {% for project in day.projects %}
+                    <span style="background: #e3f2fd; padding: 2px 8px; border-radius: 12px; font-size: 0.8em; margin: 2px;">
+                        {{ project.name }}: {{ project.hours | duration }}
+                    </span>
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% if summary.top_productive_days %}
+<div class="alert alert-success">
+    <strong>🏆 Días más productivos:</strong>
+    {% for day in summary.top_productive_days[:3] %}
+    {{ day.date | date }} ({{ day.hours | duration }}){% if not loop.last %}, {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if summary.insights and summary.insights|length > 0 %}
+<div class="content-section">
+    <h2>📊 Análisis del Período</h2>
+    <ul style="color: #555; line-height: 1.8;">
+        {% for insight in summary.insights %}
+        <li>{{ insight }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<div class="content-section">
+    <h2>Próximos Pasos</h2>
+    <p>Basándose en este resumen de tiempo:</p>
+    
+    <ol style="color: #555; line-height: 1.8;">
+        <li>📋 Revisa las horas registradas para asegurar precisión</li>
+        <li>📈 Considera optimizar la distribución de tiempo entre proyectos</li>
+        <li>💰 Verifica que todas las horas facturables estén incluidas en las facturas</li>
+        {% if summary.pending_approvals > 0 %}
+        <li>⏳ Hay {{ summary.pending_approvals }} entrada(s) de tiempo pendientes de aprobación</li>
+        {% endif %}
+    </ol>
+</div>
+
+<div class="content-section" style="text-align: center;">
+    {% if summary.dashboard_url %}
+    <a href="{{ summary.dashboard_url }}" class="btn">Ver Dashboard Completo</a>
+    {% endif %}
+    
+    {% if summary.export_url %}
+    <a href="{{ summary.export_url }}" class="btn btn-secondary">Exportar a Excel</a>
+    {% endif %}
+    
+    {% if summary.invoice_url %}
+    <a href="{{ summary.invoice_url }}" class="btn btn-success">Crear Factura</a>
+    {% endif %}
+</div>
+
+<div class="alert alert-info">
+    <strong>💡 Consejo:</strong> 
+    {% if period == "weekly" %}
+    Los resúmenes semanales te ayudan a mantener un control constante de tu productividad y facturación.
+    {% elif period == "monthly" %}
+    Los resúmenes mensuales son perfectos para evaluaciones de rendimiento y planificación de facturación.
+    {% else %}
+    Revisar regularmente tus registros de tiempo te ayuda a mantener una gestión profesional de tus proyectos.
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block signature %}
+<div class="content-section">
+    <p>¡Excelente trabajo durante este período!</p>
+    <p>Seguiremos enviándote estos resúmenes para ayudarte a mantener un control preciso de tu tiempo.</p>
+    <p><strong>{{ company_name }}</strong></p>
+</div>
+{% endblock %}

@@ -23,6 +23,7 @@ except ImportError:
 
 from app.config import settings
 from app.infrastructure.web.middleware.error_handler import ErrorHandlerMiddleware
+from app.infrastructure.web.middleware.auth_middleware import AuthenticationMiddleware
 from app.infrastructure.web.routers import (
     auth,
     clients,
@@ -30,7 +31,11 @@ from app.infrastructure.web.routers import (
     tasks,
     time_entries,
     invoices,
-    shares
+    shares,
+    templates,
+    uploads,
+    storage_admin,
+    notifications
 )
 
 # Configure logging
@@ -65,6 +70,14 @@ async def lifespan(app: FastAPI):
         logger.info("Sentry initialized")
     elif settings.sentry_dsn and not SENTRY_AVAILABLE:
         logger.warning("Sentry DSN configured but Sentry SDK not installed")
+    
+    # Initialize event system for notifications
+    try:
+        from app.infrastructure.events.event_setup import initialize_event_system
+        initialize_event_system()
+        logger.info("Event system initialized")
+    except Exception as e:
+        logger.error(f"Failed to initialize event system: {str(e)}")
     
     # Here you can add database connection pool initialization
     # supabase client initialization, etc.
@@ -107,6 +120,9 @@ def create_application() -> FastAPI:
             allowed_hosts=["*"]  # Configure with your domain
         )
     
+    # Add authentication middleware
+    app.add_middleware(AuthenticationMiddleware)
+    
     # Add custom error handler middleware
     app.add_middleware(ErrorHandlerMiddleware)
     
@@ -145,6 +161,26 @@ def create_application() -> FastAPI:
         shares.router,
         prefix=f"{settings.api_prefix}/shares",
         tags=["Sharing"]
+    )
+    app.include_router(
+        templates.router,
+        prefix=f"{settings.api_prefix}/templates",
+        tags=["Templates & PDFs"]
+    )
+    app.include_router(
+        uploads.router,
+        prefix=f"{settings.api_prefix}/uploads",
+        tags=["File Uploads"]
+    )
+    app.include_router(
+        storage_admin.router,
+        prefix=f"{settings.api_prefix}/storage",
+        tags=["Storage Management"]
+    )
+    app.include_router(
+        notifications.router,
+        prefix=f"{settings.api_prefix}/notifications",
+        tags=["Notifications & Events"]
     )
     
     # Root endpoint

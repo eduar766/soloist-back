@@ -30,6 +30,8 @@ from app.domain.repositories.project_repository import ProjectRepository
 from app.domain.repositories.time_entry_repository import TimeEntryRepository
 from app.domain.services.billing_service import BillingService
 from app.domain.services.invoice_service import InvoiceService
+from app.domain.events.base import publish_event
+from app.domain.events.invoice_events import InvoiceCreated, InvoiceSent, InvoicePaid
 
 
 class CreateInvoiceUseCase(AuthorizedUseCase, CreateUseCase[CreateInvoiceRequestDTO, InvoiceResponseDTO]):
@@ -122,6 +124,17 @@ class CreateInvoiceUseCase(AuthorizedUseCase, CreateUseCase[CreateInvoiceRequest
         
         # Save invoice
         saved_invoice = await self.invoice_repository.save(invoice)
+        
+        # Publish invoice created event
+        await publish_event(InvoiceCreated(
+            invoice_id=saved_invoice.id,
+            client_id=saved_invoice.client_id,
+            user_id=self.current_user_id,
+            invoice_number=saved_invoice.invoice_number,
+            total_amount=float(saved_invoice.total_amount),
+            currency=saved_invoice.currency,
+            due_date=saved_invoice.due_date
+        ))
         
         return await self._invoice_to_response_dto(saved_invoice)
 
@@ -324,6 +337,16 @@ class SendInvoiceUseCase(AuthorizedUseCase, UpdateUseCase[SendInvoiceRequestDTO,
         # Save invoice
         saved_invoice = await self.invoice_repository.save(invoice)
         
+        # Publish invoice sent event
+        await publish_event(InvoiceSent(
+            invoice_id=saved_invoice.id,
+            client_id=saved_invoice.client_id,
+            user_id=self.current_user_id,
+            invoice_number=saved_invoice.invoice_number,
+            client_email=request.recipient_email,
+            sent_at=datetime.now()
+        ))
+        
         return await self._invoice_to_response_dto(saved_invoice)
 
 
@@ -354,6 +377,19 @@ class RecordPaymentUseCase(AuthorizedUseCase, CreateUseCase[PaymentRequestDTO, P
         
         # Save invoice
         await self.invoice_repository.save(invoice)
+        
+        # Publish invoice paid event
+        await publish_event(InvoicePaid(
+            invoice_id=invoice.id,
+            client_id=invoice.client_id,
+            user_id=self.current_user_id,
+            invoice_number=invoice.invoice_number,
+            amount_paid=float(request.amount),
+            currency=invoice.currency,
+            payment_method=request.payment_method.value,
+            transaction_id=request.reference,
+            payment_date=request.payment_date or date.today()
+        ))
         
         return PaymentResponseDTO(
             id=payment.id,

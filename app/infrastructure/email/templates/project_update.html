@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Actualización del Proyecto - {{ project.name }}{% endblock %}
+
+{% block header_title %}Actualización de Proyecto{% endblock %}
+{% block header_subtitle %}{{ project.name }}{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <p>Te informamos sobre una importante actualización en el proyecto <strong>{{ project.name }}</strong>.</p>
+</div>
+
+{% if update_type == "status_change" %}
+    <div class="alert alert-info">
+        <strong>Cambio de Estado:</strong> El proyecto ha cambiado de estado a <strong>{{ project.status | capitalize_words }}</strong>.
+    </div>
+{% elif update_type == "milestone_completed" %}
+    <div class="alert alert-success">
+        <strong>¡Hito Completado!</strong> Se ha completado un importante hito del proyecto.
+    </div>
+{% elif update_type == "deadline_approaching" %}
+    <div class="alert alert-warning">
+        <strong>Fecha Límite Próxima:</strong> El proyecto tiene una fecha límite próxima.
+    </div>
+{% elif update_type == "budget_update" %}
+    <div class="alert alert-info">
+        <strong>Actualización de Presupuesto:</strong> Ha habido cambios en el presupuesto del proyecto.
+    </div>
+{% endif %}
+
+<div class="summary-box">
+    <h3>Información del Proyecto</h3>
+    
+    <div class="summary-item">
+        <span>Nombre del Proyecto:</span>
+        <strong>{{ project.name }}</strong>
+    </div>
+    
+    <div class="summary-item">
+        <span>Estado Actual:</span>
+        <strong>{{ project.status | capitalize_words }}</strong>
+    </div>
+    
+    {% if project.start_date %}
+    <div class="summary-item">
+        <span>Fecha de Inicio:</span>
+        <strong>{{ project.start_date | date }}</strong>
+    </div>
+    {% endif %}
+    
+    {% if project.end_date %}
+    <div class="summary-item">
+        <span>Fecha de Finalización:</span>
+        <strong>{{ project.end_date | date }}</strong>
+    </div>
+    {% endif %}
+    
+    {% if project.budget %}
+    <div class="summary-item">
+        <span>Presupuesto:</span>
+        <strong>{{ project.budget | currency(project.currency) }}</strong>
+    </div>
+    {% endif %}
+    
+    {% if project.progress_percentage %}
+    <div class="summary-item">
+        <span>Progreso:</span>
+        <strong>{{ project.progress_percentage }}%</strong>
+    </div>
+    {% endif %}
+</div>
+
+{% if project.description %}
+<div class="content-section">
+    <h2>Descripción del Proyecto</h2>
+    <p>{{ project.description }}</p>
+</div>
+{% endif %}
+
+{% if update_details %}
+<div class="content-section">
+    <h2>Detalles de la Actualización</h2>
+    <div class="alert alert-info">
+        {{ update_details }}
+    </div>
+</div>
+{% endif %}
+
+{% if project.tasks and project.tasks|length > 0 %}
+<div class="content-section">
+    <h2>Estado de las Tareas</h2>
+    
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Tarea</th>
+                <th>Estado</th>
+                <th>Fecha Límite</th>
+                <th style="text-align: right;">Progreso</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in project.tasks[:5] %}
+            <tr>
+                <td>{{ task.title }}</td>
+                <td>
+                    {% if task.status == "completed" %}
+                    <span style="color: #28a745;">✅ {{ task.status | capitalize_words }}</span>
+                    {% elif task.status == "in_progress" %}
+                    <span style="color: #007bff;">🔄 {{ task.status | capitalize_words }}</span>
+                    {% else %}
+                    <span style="color: #6c757d;">⏳ {{ task.status | capitalize_words }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ task.due_date | date if task.due_date else "-" }}</td>
+                <td style="text-align: right;">{{ task.progress }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    {% if project.tasks|length > 5 %}
+    <p style="text-align: center; color: #666; font-style: italic;">
+        ... y {{ project.tasks|length - 5 }} tareas más
+    </p>
+    {% endif %}
+</div>
+{% endif %}
+
+{% if project.recent_activity %}
+<div class="content-section">
+    <h2>Actividad Reciente</h2>
+    <ul style="color: #555; line-height: 1.8;">
+        {% for activity in project.recent_activity[:3] %}
+        <li><strong>{{ activity.date | date }}:</strong> {{ activity.description }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if project.next_steps %}
+<div class="content-section">
+    <h2>Próximos Pasos</h2>
+    <ol style="color: #555; line-height: 1.8;">
+        {% for step in project.next_steps %}
+        <li>{{ step }}</li>
+        {% endfor %}
+    </ol>
+</div>
+{% endif %}
+
+<div class="content-section" style="text-align: center;">
+    {% if project.dashboard_url %}
+    <a href="{{ project.dashboard_url }}" class="btn">Ver Dashboard del Proyecto</a>
+    {% endif %}
+    
+    {% if project.report_url %}
+    <a href="{{ project.report_url }}" class="btn btn-secondary">Descargar Reporte</a>
+    {% endif %}
+</div>
+
+<div class="content-section">
+    <h2>¿Tienes Preguntas?</h2>
+    <p>Si tienes alguna pregunta sobre esta actualización o el proyecto en general:</p>
+    <p>
+        📧 Email: <a href="mailto:{{ project_manager_email or company_email }}">{{ project_manager_email or company_email }}</a><br>
+        📞 Teléfono: {{ project_manager_phone or company_phone }}<br>
+        💬 También puedes responder directamente a este email
+    </p>
+</div>
+
+{% if project.deadline_approaching %}
+<div class="alert alert-warning">
+    <strong>⏰ Recordatorio:</strong> La fecha límite del proyecto se aproxima ({{ project.end_date | date }}). 
+    Por favor revisa el progreso y contáctanos si necesitas ajustar el cronograma.
+</div>
+{% endif %}
+{% endblock %}
+
+{% block signature %}
+<div class="content-section">
+    <p>Seguiremos manteniéndote informado sobre el progreso del proyecto.</p>
+    <p><strong>{{ project_manager_name or company_name }}</strong></p>
+    {% if project_manager_title %}
+    <p style="color: #666;">{{ project_manager_title }}</p>
+    {% endif %}
+</div>
+{% endblock %}

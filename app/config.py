@@ -80,13 +80,15 @@ class Settings(BaseSettings):
     sentry_dsn: Optional[str] = Field(default=None)
     sentry_traces_sample_rate: float = Field(default=0.1)
     
-    # Email Configuration (for future use)
-    smtp_host: Optional[str] = Field(default=None)
-    smtp_port: int = Field(default=587)
-    smtp_user: Optional[str] = Field(default=None)
-    smtp_password: Optional[str] = Field(default=None)
-    email_from_name: str = Field(default="Freelancer System")
-    email_from_address: str = Field(default="noreply@example.com")
+    # Email Configuration
+    smtp_host: Optional[str] = Field(default=None, description="SMTP server host")
+    smtp_port: int = Field(default=587, description="SMTP server port")
+    smtp_user: Optional[str] = Field(default=None, description="SMTP username")
+    smtp_password: Optional[str] = Field(default=None, description="SMTP password")
+    email_from_name: str = Field(default="Sistema de Gestión Freelancer", description="Default sender name")
+    email_from_address: str = Field(default="noreply@freelancer.com", description="Default sender email")
+    email_use_tls: bool = Field(default=True, description="Use TLS for SMTP connection")
+    email_use_ssl: bool = Field(default=False, description="Use SSL for SMTP connection")
     
     # Localization
     timezone: str = Field(default="America/Santiago")

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Factura {{ invoice.invoice_number }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 3cm 2cm;
+        }
+        
+        body {
+            font-family: 'Helvetica', sans-serif;
+            font-size: 12pt;
+            line-height: 1.5;
+            color: #333;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .company h1 {
+            font-size: 24pt;
+            margin: 0 0 10px 0;
+            color: #000;
+        }
+        
+        .invoice-info {
+            text-align: right;
+        }
+        
+        .invoice-info h2 {
+            font-size: 18pt;
+            margin: 0 0 10px 0;
+            color: #666;
+        }
+        
+        .bill-to {
+            margin: 30px 0;
+        }
+        
+        .bill-to h3 {
+            font-size: 14pt;
+            margin: 0 0 10px 0;
+            color: #000;
+            text-transform: uppercase;
+            font-weight: normal;
+        }
+        
+        .items {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+        }
+        
+        .items th {
+            background: #f9f9f9;
+            padding: 15px 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            font-weight: normal;
+            text-transform: uppercase;
+            font-size: 10pt;
+            color: #666;
+        }
+        
+        .items th.right { text-align: right; }
+        
+        .items td {
+            padding: 15px 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .items td.right { text-align: right; }
+        
+        .total-section {
+            float: right;
+            width: 250px;
+            margin-top: 30px;
+        }
+        
+        .total-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .total-line.final {
+            border-top: 2px solid #000;
+            border-bottom: 2px solid #000;
+            font-weight: bold;
+            font-size: 14pt;
+            margin-top: 10px;
+        }
+        
+        .footer {
+            clear: both;
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 10pt;
+            color: #666;
+        }
+        
+        .text-muted { color: #666; }
+        .text-small { font-size: 10pt; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="company">
+            <h1>{{ company.name }}</h1>
+            <div class="text-muted">
+                {% if company.address %}{{ company.address }}<br>{% endif %}
+                {% if company.email %}{{ company.email }}<br>{% endif %}
+                {% if company.tax_id %}{{ company.tax_id }}{% endif %}
+            </div>
+        </div>
+        
+        <div class="invoice-info">
+            <h2>FACTURA</h2>
+            <div><strong>N°:</strong> {{ invoice.invoice_number }}</div>
+            <div><strong>Fecha:</strong> {{ invoice.issue_date.strftime('%d/%m/%Y') }}</div>
+            <div><strong>Vence:</strong> {{ invoice.due_date.strftime('%d/%m/%Y') }}</div>
+        </div>
+    </div>
+    
+    <div class="bill-to">
+        <h3>Facturar a</h3>
+        <div>
+            <strong>{{ client.name }}</strong><br>
+            {% if client.address %}{{ client.address }}<br>{% endif %}
+            {% if client.tax_id %}{{ client.tax_id }}{% endif %}
+        </div>
+    </div>
+    
+    <table class="items">
+        <thead>
+            <tr>
+                <th style="width: 60%;">Descripción</th>
+                <th class="right" style="width: 15%;">Cantidad</th>
+                <th class="right" style="width: 15%;">Precio</th>
+                <th class="right" style="width: 15%;">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in invoice.line_items %}
+            <tr>
+                <td>{{ item.description }}</td>
+                <td class="right">{{ item.quantity }}</td>
+                <td class="right">{{ invoice.currency_symbol }}{{ "%.2f"|format(item.unit_price) }}</td>
+                <td class="right">{{ invoice.currency_symbol }}{{ "%.2f"|format(item.total_amount) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="total-section">
+        <div class="total-line">
+            <span>Subtotal</span>
+            <span>{{ invoice.currency_symbol }}{{ "%.2f"|format(invoice.subtotal) }}</span>
+        </div>
+        
+        {% if invoice.tax_rate > 0 %}
+        <div class="total-line">
+            <span>Impuestos ({{ "%.1f"|format(invoice.tax_rate) }}%)</span>
+            <span>{{ invoice.currency_symbol }}{{ "%.2f"|format(invoice.tax_amount) }}</span>
+        </div>
+        {% endif %}
+        
+        <div class="total-line final">
+            <span>TOTAL</span>
+            <span>{{ invoice.currency_symbol }}{{ "%.2f"|format(invoice.total_amount) }}</span>
+        </div>
+    </div>
+    
+    {% if invoice.notes %}
+    <div class="footer">
+        <strong>Notas:</strong><br>
+        {{ invoice.notes|replace('\n', '<br>')|safe }}
+    </div>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Pago Recibido - {{ payment.invoice_number }}{% endblock %}
+
+{% block header_title %}¡Pago Recibido!{% endblock %}
+{% block header_subtitle %}Confirmación de Pago - {{ payment.invoice_number }}{% endblock %}
+
+{% block content %}
+<div class="alert alert-success">
+    <strong>¡Excelente!</strong> Hemos recibido tu pago correctamente.
+</div>
+
+<div class="content-section">
+    <p>Nos complace confirmarte que hemos recibido tu pago por la factura <strong>{{ payment.invoice_number }}</strong>.</p>
+</div>
+
+<div class="summary-box">
+    <h3>Detalles del Pago</h3>
+    
+    <div class="summary-item">
+        <span>Número de Factura:</span>
+        <strong>{{ payment.invoice_number }}</strong>
+    </div>
+    
+    <div class="summary-item">
+        <span>Monto Pagado:</span>
+        <strong>{{ payment.amount | currency(payment.currency) }}</strong>
+    </div>
+    
+    <div class="summary-item">
+        <span>Método de Pago:</span>
+        <strong>{{ payment.payment_method | capitalize_words }}</strong>
+    </div>
+    
+    <div class="summary-item">
+        <span>Fecha de Pago:</span>
+        <strong>{{ payment.payment_date | date }}</strong>
+    </div>
+    
+    {% if payment.transaction_id %}
+    <div class="summary-item">
+        <span>ID de Transacción:</span>
+        <strong>{{ payment.transaction_id }}</strong>
+    </div>
+    {% endif %}
+    
+    {% if payment.reference %}
+    <div class="summary-item">
+        <span>Referencia:</span>
+        <strong>{{ payment.reference }}</strong>
+    </div>
+    {% endif %}
+</div>
+
+{% if payment.remaining_balance and payment.remaining_balance > 0 %}
+<div class="alert alert-warning">
+    <strong>Balance Pendiente:</strong> Aún queda un saldo pendiente de <strong>{{ payment.remaining_balance | currency(payment.currency) }}</strong> en esta factura.
+</div>
+{% else %}
+<div class="alert alert-success">
+    <strong>Factura Completamente Pagada</strong> - Esta factura ha sido pagada en su totalidad.
+</div>
+{% endif %}
+
+<div class="content-section">
+    <h2>¿Qué sigue?</h2>
+    <p>Tu pago ha sido procesado exitosamente. Aquí tienes algunos pasos que puedes seguir:</p>
+    
+    <ul style="color: #555; line-height: 1.8;">
+        <li>📧 Guarda este email como comprobante de pago</li>
+        <li>📄 Descarga el recibo de pago si está disponible</li>
+        <li>📞 Contáctanos si tienes alguna pregunta</li>
+        {% if payment.remaining_balance and payment.remaining_balance > 0 %}
+        <li>💰 Programa el pago del balance restante si es necesario</li>
+        {% endif %}
+    </ul>
+</div>
+
+{% if payment.receipt_url %}
+<div class="content-section" style="text-align: center;">
+    <a href="{{ payment.receipt_url }}" class="btn btn-success">Descargar Recibo</a>
+</div>
+{% endif %}
+
+<div class="content-section">
+    <h2>Información de Contacto</h2>
+    <p>Si necesitas asistencia o tienes preguntas sobre este pago:</p>
+    <p>
+        {% if company_email %}
+        📧 Email: <a href="mailto:{{ company_email }}">{{ company_email }}</a><br>
+        {% endif %}
+        {% if company_phone %}
+        📞 Teléfono: {{ company_phone }}<br>
+        {% endif %}
+        {% if support_hours %}
+        🕒 Horario: {{ support_hours }}
+        {% endif %}
+    </p>
+</div>
+
+{% if next_invoice_date %}
+<div class="alert alert-info">
+    <strong>Próxima Factura:</strong> Tu siguiente facturación está programada para el {{ next_invoice_date | date }}.
+</div>
+{% endif %}
+{% endblock %}
+
+{% block signature %}
+<div class="content-section">
+    <p>¡Gracias por tu pago puntual!</p>
+    <p>Valoramos mucho tu confianza en nuestros servicios.</p>
+    <p><strong>{{ company_name }}</strong></p>
+</div>
+{% endblock %}

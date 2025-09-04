@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Factura {{ invoice.invoice_number }} Enviada{% endblock %}
+
+{% block header_title %}Factura Enviada{% endblock %}
+{% block header_subtitle %}{{ invoice.invoice_number }} - {{ company_name }}{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <p>Te informamos que hemos enviado la factura <strong>{{ invoice.invoice_number }}</strong> correspondiente a los servicios realizados.</p>
+</div>
+
+<div class="alert alert-info">
+    <strong>Información de la factura:</strong><br>
+    Número: {{ invoice.invoice_number }}<br>
+    Fecha: {{ invoice.issue_date | date }}<br>
+    Vencimiento: {{ invoice.due_date | date }}<br>
+    Estado: {{ invoice.status | capitalize_words }}
+</div>
+
+<div class="summary-box">
+    <h3>Resumen de la Factura</h3>
+    
+    {% if invoice.items %}
+    <div class="content-section">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Descripción</th>
+                    <th style="text-align: right;">Cantidad</th>
+                    <th style="text-align: right;">Precio Unit.</th>
+                    <th style="text-align: right;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in invoice.items %}
+                <tr>
+                    <td>{{ item.description }}</td>
+                    <td style="text-align: right;">{{ item.quantity }}</td>
+                    <td style="text-align: right;">{{ item.unit_price | currency(invoice.currency) }}</td>
+                    <td style="text-align: right;">{{ (item.quantity * item.unit_price) | currency(invoice.currency) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    
+    <div class="summary-item">
+        <span>Subtotal:</span>
+        <strong>{{ invoice.subtotal | currency(invoice.currency) }}</strong>
+    </div>
+    
+    {% if invoice.tax_amount and invoice.tax_amount > 0 %}
+    <div class="summary-item">
+        <span>Impuestos ({{ invoice.tax_rate }}%):</span>
+        <strong>{{ invoice.tax_amount | currency(invoice.currency) }}</strong>
+    </div>
+    {% endif %}
+    
+    {% if invoice.discount_amount and invoice.discount_amount > 0 %}
+    <div class="summary-item">
+        <span>Descuento:</span>
+        <strong>-{{ invoice.discount_amount | currency(invoice.currency) }}</strong>
+    </div>
+    {% endif %}
+    
+    <div class="summary-item">
+        <span><strong>Total a Pagar:</strong></span>
+        <strong style="color: #2c3e50; font-size: 1.2em;">{{ invoice.total_amount | currency(invoice.currency) }}</strong>
+    </div>
+</div>
+
+{% if invoice.payment_instructions %}
+<div class="content-section">
+    <h2>Instrucciones de Pago</h2>
+    <div class="alert alert-warning">
+        {{ invoice.payment_instructions }}
+    </div>
+</div>
+{% endif %}
+
+<div class="content-section">
+    <h2>Información de Contacto</h2>
+    <p>Si tienes alguna pregunta sobre esta factura, no dudes en contactarnos:</p>
+    <p>
+        {% if company_email %}
+        📧 Email: <a href="mailto:{{ company_email }}">{{ company_email }}</a><br>
+        {% endif %}
+        {% if company_phone %}
+        📞 Teléfono: {{ company_phone }}<br>
+        {% endif %}
+        {% if company_website %}
+        🌐 Sitio web: <a href="{{ company_website }}">{{ company_website }}</a>
+        {% endif %}
+    </p>
+</div>
+
+<div class="content-section" style="text-align: center;">
+    {% if invoice.payment_url %}
+    <a href="{{ invoice.payment_url }}" class="btn btn-success">Pagar Ahora</a>
+    {% endif %}
+    {% if invoice.download_url %}
+    <a href="{{ invoice.download_url }}" class="btn btn-secondary">Descargar PDF</a>
+    {% endif %}
+</div>
+
+<div class="alert alert-info">
+    <strong>Términos de Pago:</strong> Esta factura debe ser pagada dentro de {{ invoice.payment_terms or '30' }} días desde la fecha de emisión. 
+    {% if invoice.late_fee_rate %}
+    Se aplicará un recargo del {{ invoice.late_fee_rate }}% por pagos atrasados.
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block signature %}
+<div class="content-section">
+    <p>Gracias por tu confianza en nuestros servicios.</p>
+    <p><strong>{{ company_name }}</strong></p>
+    {% if company_address %}
+    <p style="color: #666; font-size: 0.9em;">{{ company_address }}</p>
+    {% endif %}
+</div>
+{% endblock %}

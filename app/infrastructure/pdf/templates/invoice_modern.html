@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Factura {{ invoice.invoice_number }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1.5cm;
+        }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', 'Helvetica Neue', sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: #1a202c;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            margin: -1.5cm -1.5cm 30px -1.5cm;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .company-section h1 {
+            font-size: 28pt;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+            letter-spacing: -0.5px;
+        }
+        
+        .company-info {
+            opacity: 0.9;
+            font-size: 10pt;
+        }
+        
+        .invoice-badge {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: right;
+        }
+        
+        .invoice-badge h2 {
+            font-size: 16pt;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+        
+        .invoice-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        .info-card {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .info-card h3 {
+            font-size: 12pt;
+            font-weight: 600;
+            color: #4a5568;
+            margin: 0 0 12px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-content {
+            color: #2d3748;
+            line-height: 1.5;
+        }
+        
+        .items-section {
+            margin: 40px 0;
+        }
+        
+        .items-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .items-table thead {
+            background: #4a5568;
+            color: white;
+        }
+        
+        .items-table th {
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 10pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .items-table th.text-right {
+            text-align: right;
+        }
+        
+        .items-table td {
+            padding: 15px 12px;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .items-table td.text-right {
+            text-align: right;
+        }
+        
+        .items-table tbody tr:hover {
+            background: #f7fafc;
+        }
+        
+        .description {
+            font-weight: 500;
+        }
+        
+        .description-detail {
+            color: #718096;
+            font-size: 9pt;
+            margin-top: 4px;
+        }
+        
+        .totals-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0 0 auto;
+            width: 300px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .total-row.final {
+            background: #667eea;
+            color: white;
+            margin: 15px -20px -20px -20px;
+            padding: 20px;
+            border: none;
+            font-size: 14pt;
+            font-weight: 700;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .notes-section {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 40px 0;
+            border-left: 4px solid #48bb78;
+        }
+        
+        .notes-title {
+            font-size: 12pt;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 12px;
+        }
+        
+        .notes-content {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+        
+        .payment-terms {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+        
+        .payment-terms-title {
+            color: #c53030;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .payment-terms-content {
+            color: #744210;
+            font-size: 10pt;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 9pt;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-draft {
+            background: #edf2f7;
+            color: #4a5568;
+        }
+        
+        .status-sent {
+            background: #bee3f8;
+            color: #2b6cb0;
+        }
+        
+        .status-paid {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+        
+        .status-overdue {
+            background: #fed7d7;
+            color: #c53030;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #a0aec0;
+            font-size: 9pt;
+        }
+        
+        /* Utility classes */
+        .text-right { text-align: right; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="company-section">
+                <h1>{{ company.name }}</h1>
+                <div class="company-info">
+                    {% if company.address %}{{ company.address }}<br>{% endif %}
+                    {% if company.city %}{{ company.city }}{% if company.country %}, {{ company.country }}{% endif %}<br>{% endif %}
+                    {% if company.email %}{{ company.email }}{% endif %}
+                    {% if company.phone %} • {{ company.phone }}{% endif %}
+                </div>
+            </div>
+            
+            <div class="invoice-badge">
+                <h2>FACTURA</h2>
+                <div><strong>N°:</strong> {{ invoice.invoice_number }}</div>
+                <div><strong>Fecha:</strong> {{ invoice.issue_date.strftime('%d/%m/%Y') }}</div>
+                <div style="margin-top: 10px;">
+                    <span class="status-badge status-{{ invoice.status }}">{{ invoice.status_display }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="invoice-meta">
+            <div class="info-card">
+                <h3>Cliente</h3>
+                <div class="info-content">
+                    <div class="font-semibold">{{ client.name }}</div>
+                    {% if client.contact %}{{ client.contact }}<br>{% endif %}
+                    {% if client.address %}{{ client.address }}<br>{% endif %}
+                    {% if client.city %}{{ client.city }}{% if client.country %}, {{ client.country }}{% endif %}<br>{% endif %}
+                    {% if client.tax_id %}{{ client.tax_id_label or 'Tax ID' }}: {{ client.tax_id }}{% endif %}
+                </div>
+            </div>
+            
+            <div class="info-card">
+                <h3>Detalles de Pago</h3>
+                <div class="info-content">
+                    <div><strong>Fecha Emisión:</strong> {{ invoice.issue_date.strftime('%d/%m/%Y') }}</div>
+                    <div><strong>Vencimiento:</strong> {{ invoice.due_date.strftime('%d/%m/%Y') }}</div>
+                    {% if project %}<div><strong>Proyecto:</strong> {{ project.name }}</div>{% endif %}
+                    <div><strong>Moneda:</strong> {{ invoice.currency }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="items-section">
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50%;">Descripción</th>
+                        <th class="text-right" style="width: 12%;">Cant.</th>
+                        <th class="text-right" style="width: 18%;">Precio Unit.</th>
+                        <th class="text-right" style="width: 18%;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in invoice.line_items %}
+                    <tr>
+                        <td>
+                            <div class="description">{{ item.description }}</div>
+                            {% if item.details %}
+                            <div class="description-detail">{{ item.details }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="text-right">{{ item.quantity }}</td>
+                        <td class="text-right">{{ invoice.currency_symbol }}{{ "%.2f"|format(item.unit_price) }}</td>
+                        <td class="text-right font-semibold">{{ invoice.currency_symbol }}{{ "%.2f"|format(item.total_amount) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="totals-card">
+            <div class="total-row">
+                <span>Subtotal</span>
+                <span class="font-semibold">{{ invoice.currency_symbol }}{{ "%.2f"|format(invoice.subtotal) }}</span>
+            </div>
+            
+            {% if invoice.discount_amount > 0 %}
+            <div class="total-row">
+                <span>Descuento</span>
+                <span class="font-semibold">-{{ invoice.currency_symbol }}{{ "%.2f"|format(invoice.discount_amount) }}</span>
+            </div>
+            {% endif %}
+            
+            {% if invoice.tax_rate > 0 %}
+            <div class="total-row">
+                <span>Impuestos ({{ "%.1f"|format(invoice.tax_rate) }}%)</span>
+                <span class="font-semibold">{{ invoice.currency_symbol }}{{ "%.2f"|format(invoice.tax_amount) }}</span>
+            </div>
+            {% endif %}
+            
+            <div class="total-row final">
+                <span>TOTAL</span>
+                <span>{{ invoice.currency_symbol }}{{ "%.2f"|format(invoice.total_amount) }}</span>
+            </div>
+        </div>
+        
+        {% if invoice.notes %}
+        <div class="notes-section">
+            <div class="notes-title">Notas Adicionales</div>
+            <div class="notes-content">{{ invoice.notes|replace('\n', '<br>')|safe }}</div>
+        </div>
+        {% endif %}
+        
+        {% if invoice.payment_terms %}
+        <div class="payment-terms">
+            <div class="payment-terms-title">Términos y Condiciones de Pago</div>
+            <div class="payment-terms-content">{{ invoice.payment_terms|replace('\n', '<br>')|safe }}</div>
+        </div>
+        {% endif %}
+        
+        <div class="footer">
+            <p>Factura generada digitalmente el {{ now.strftime('%d/%m/%Y a las %H:%M') }}</p>
+            {% if company.footer_text %}
+            <p>{{ company.footer_text }}</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

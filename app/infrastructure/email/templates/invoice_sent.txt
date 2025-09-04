@@ -1,0 +1,51 @@
+{{ app_name }}
+Factura {{ invoice.invoice_number }} Enviada
+
+Hola {{ client_name }},
+
+Te informamos que hemos enviado la factura {{ invoice.invoice_number }} correspondiente a los servicios realizados.
+
+INFORMACIÓN DE LA FACTURA:
+- Número: {{ invoice.invoice_number }}
+- Fecha: {{ invoice.issue_date | date }}
+- Vencimiento: {{ invoice.due_date | date }}
+- Estado: {{ invoice.status | capitalize_words }}
+
+RESUMEN DE LA FACTURA:
+{% if invoice.items %}
+{% for item in invoice.items %}
+{{ item.description }}: {{ item.quantity }} x {{ item.unit_price | currency(invoice.currency) }} = {{ (item.quantity * item.unit_price) | currency(invoice.currency) }}
+{% endfor %}
+{% endif %}
+
+Subtotal: {{ invoice.subtotal | currency(invoice.currency) }}
+{% if invoice.tax_amount and invoice.tax_amount > 0 %}
+Impuestos ({{ invoice.tax_rate }}%): {{ invoice.tax_amount | currency(invoice.currency) }}
+{% endif %}
+{% if invoice.discount_amount and invoice.discount_amount > 0 %}
+Descuento: -{{ invoice.discount_amount | currency(invoice.currency) }}
+{% endif %}
+TOTAL A PAGAR: {{ invoice.total_amount | currency(invoice.currency) }}
+
+{% if invoice.payment_instructions %}
+INSTRUCCIONES DE PAGO:
+{{ invoice.payment_instructions }}
+{% endif %}
+
+INFORMACIÓN DE CONTACTO:
+{% if company_email %}Email: {{ company_email }}{% endif %}
+{% if company_phone %}Teléfono: {{ company_phone }}{% endif %}
+{% if company_website %}Sitio web: {{ company_website }}{% endif %}
+
+{% if invoice.payment_url %}Para pagar ahora, visita: {{ invoice.payment_url }}{% endif %}
+{% if invoice.download_url %}Para descargar el PDF, visita: {{ invoice.download_url }}{% endif %}
+
+TÉRMINOS DE PAGO: Esta factura debe ser pagada dentro de {{ invoice.payment_terms or '30' }} días desde la fecha de emisión.
+{% if invoice.late_fee_rate %}Se aplicará un recargo del {{ invoice.late_fee_rate }}% por pagos atrasados.{% endif %}
+
+Gracias por tu confianza en nuestros servicios.
+
+{{ company_name }}
+{% if company_address %}{{ company_address }}{% endif %}
+
+© {{ current_year }} {{ company_name or app_name }}. Todos los derechos reservados.
