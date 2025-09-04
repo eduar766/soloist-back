@@ -13,11 +13,18 @@ from .base import (
     BusinessRuleViolation,
     EntityNotFoundError,
     DuplicateEntityError,
-    ValueObject,
-    Email,
+    ValueObject
+)
+
+# Value Objects
+from .value_objects import (
     Money,
+    Currency,
     TimeRange,
-    InvoiceNumber
+    InvoiceNumber,
+    Email,
+    PhoneNumber,
+    Address
 )
 
 # Domain entities
