@@ -25,7 +25,7 @@ from app.config import settings
 from app.infrastructure.web.middleware.error_handler import ErrorHandlerMiddleware
 from app.infrastructure.web.middleware.auth_middleware import AuthenticationMiddleware
 from app.infrastructure.web.routers import (
-    # auth,
+    auth,
     clients,
     # projects,
     # tasks,
@@ -127,11 +127,11 @@ def create_application() -> FastAPI:
     app.add_middleware(ErrorHandlerMiddleware)
     
     # Include routers
-    # app.include_router(
-    #     auth.router,
-    #     prefix=f"{settings.api_prefix}/auth",
-    #     tags=["Authentication"]
-    # )
+    app.include_router(
+        auth.router,
+        prefix=f"{settings.api_prefix}/auth",
+        tags=["Authentication"]
+    )
     app.include_router(
         clients.router,
         prefix=f"{settings.api_prefix}/clients",

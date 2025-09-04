@@ -13,6 +13,7 @@ from app.infrastructure.auth import (
     get_current_user_payload
 )
 from app.infrastructure.auth.dependencies import get_auth_service
+from app.infrastructure.auth.jwt_handler import JWTHandler
 from app.domain.models.base import ValidationError
 
 
@@ -82,16 +83,27 @@ async def register(
             metadata=metadata
         )
         
+        if not result:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Registration failed - authentication service unavailable"
+            )
+        
         return AuthResponse(
-            user=result["user"],
-            access_token=result.get("session", {}).get("access_token", ""),
-            refresh_token=result.get("session", {}).get("refresh_token", "")
+            user=result.get("user", {}),
+            access_token=result.get("session", {}).get("access_token", "") if result.get("session") else "",
+            refresh_token=result.get("session", {}).get("refresh_token", "") if result.get("session") else ""
         )
         
     except ValidationError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Registration failed: {str(e)}"
         )
 
 
@@ -112,16 +124,27 @@ async def login(
             password=request.password
         )
         
+        if not result:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Login failed - authentication service unavailable"
+            )
+        
         return AuthResponse(
-            user=result["user"],
-            access_token=result["access_token"],
-            refresh_token=result["refresh_token"]
+            user=result.get("user", {}),
+            access_token=result.get("access_token", ""),
+            refresh_token=result.get("refresh_token", "")
         )
         
     except ValidationError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Login failed: {str(e)}"
         )
 
 
@@ -263,3 +286,33 @@ async def verify_otp(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
+
+
+@router.post("/generate-test-token", response_model=Dict[str, str])
+async def generate_test_token(
+    user_id: str = "test-user-123",
+    email: str = "test@example.com", 
+    role: str = "freelancer"
+):
+    """
+    Generate a test JWT token for development/testing purposes.
+    REMOVE THIS ENDPOINT IN PRODUCTION!
+    
+    - **user_id**: User ID for the token (default: test-user-123)
+    - **email**: Email for the token (default: test@example.com)
+    - **role**: Role for the token (default: freelancer)
+    """
+    jwt_handler = JWTHandler()
+    token = jwt_handler.generate_test_token(
+        user_id=user_id,
+        email=email,
+        role=role
+    )
+    
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user_id": user_id,
+        "email": email,
+        "role": role
+    }

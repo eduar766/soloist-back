@@ -5,7 +5,7 @@ Validates JWT tokens and extracts user information.
 
 import jwt
 from typing import Optional, Dict, Any
-from datetime import datetime
+from datetime import datetime, timedelta
 from jose import JWTError, jwt as jose_jwt
 
 from app.config import get_settings
@@ -43,7 +43,7 @@ class JWTHandler:
                 token,
                 self.jwt_secret,
                 algorithms=[self.jwt_algorithm],
-                options={"verify_exp": True}
+                options={"verify_exp": True, "verify_aud": False}  # Disable audience verification for development
             )
             
             # Validate required claims
@@ -143,3 +143,37 @@ class JWTHandler:
             return self.verify_token(token)
         except ValidationError:
             return None
+    
+    def generate_test_token(self, user_id: str, email: str = "test@example.com", role: str = "freelancer", expires_minutes: int = 60) -> str:
+        """
+        Generate a test JWT token for development/testing purposes.
+        
+        Args:
+            user_id: User ID to include in token
+            email: User email (default: test@example.com)
+            role: User role (default: freelancer)
+            expires_minutes: Token expiration in minutes (default: 60)
+            
+        Returns:
+            JWT token string
+        """
+        now = datetime.utcnow()
+        expire = now + timedelta(minutes=expires_minutes)
+        
+        payload = {
+            "sub": user_id,  # Subject (user ID)
+            "email": email,
+            "role": role,
+            "iat": int(now.timestamp()),  # Issued at
+            "exp": int(expire.timestamp()),  # Expires at
+            "aud": "authenticated",
+            "iss": "supabase"
+        }
+        
+        token = jose_jwt.encode(
+            payload,
+            self.jwt_secret,
+            algorithm=self.jwt_algorithm
+        )
+        
+        return token

@@ -29,11 +29,12 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
             "/api/v1/docs",
             "/api/v1/redoc",
             "/api/v1/openapi.json",
-            "/auth/login",
-            "/auth/register",
-            "/auth/refresh",
-            "/auth/reset-password",
-            "/auth/verify-otp",
+            "/api/v1/auth/login",
+            "/api/v1/auth/register",
+            "/api/v1/auth/refresh",
+            "/api/v1/auth/reset-password",
+            "/api/v1/auth/verify-otp",
+            "/api/v1/auth/generate-test-token",
             "/health",
             "/metrics"
         }
